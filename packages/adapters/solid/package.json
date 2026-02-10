@@ -1,0 +1,21 @@
+{
+  "name": "@venner/solid",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@venner/core": "*",
+    "@venner/primitives": "*",
+    "@venner/ui": "*",
+    "solid-js": "^1.8.0",
+    "@zag-js/solid": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
