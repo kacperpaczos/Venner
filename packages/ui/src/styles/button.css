@@ -1,0 +1,64 @@
+.venner-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--venner-btn-padding, 6px 12px);
+  min-height: 36px;
+  min-width: 36px;
+  background: var(--venner-btn-bg);
+  color: var(--venner-btn-fg);
+  border: none;
+  border-radius: var(--venner-btn-radius, 6px);
+  font-family: var(--venner-font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--venner-transition-fast);
+}
+
+.venner-button[data-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.venner-button[data-hovered="true"] {
+  background: var(--venner-btn-bg-hover, var(--venner-btn-bg));
+}
+
+.venner-button[data-pressed="true"] {
+  background: var(--venner-btn-bg-active, var(--venner-btn-bg));
+  transform: scale(0.98);
+}
+
+.venner-button[data-focused="true"] {
+  outline: 2px solid var(--venner-btn-accent);
+  outline-offset: 2px;
+}
+
+/* Variants */
+.venner-button[data-variant="primary"] {
+  background: var(--venner-btn-accent);
+  color: white;
+}
+
+.venner-button[data-variant="secondary"] {
+  background: transparent;
+  border: 1px solid var(--venner-btn-accent);
+  color: var(--venner-btn-accent);
+}
+
+/* Sizes */
+.venner-button[data-size="sm"] {
+  padding: 4px 8px;
+  min-height: 28px;
+  font-size: 12px;
+}
+
+.venner-button[data-size="lg"] {
+  padding: 10px 20px;
+  min-height: 48px;
+  font-size: 16px;
+}

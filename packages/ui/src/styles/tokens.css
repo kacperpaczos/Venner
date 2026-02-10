@@ -1,0 +1,30 @@
+:root {
+  /* Empty shells - filled by theme loaders at runtime */
+  --venner-bg: initial;
+  --venner-fg: initial;
+  --venner-accent: initial;
+  --venner-border: initial;
+  --venner-error: initial;
+  --venner-success: initial;
+  --venner-warning: initial;
+  
+  /* Button tokens */
+  --venner-btn-bg: var(--venner-bg);
+  --venner-btn-bg-hover: initial;
+  --venner-btn-bg-active: initial;
+  --venner-btn-fg: var(--venner-fg);
+  --venner-btn-accent: var(--venner-accent);
+  --venner-btn-border: var(--venner-border);
+  --venner-btn-radius: initial;
+  --venner-btn-padding: initial;
+  --venner-btn-min-height: initial;
+  
+  /* Transitions */
+  --venner-transition-fast: 150ms ease;
+  --venner-transition-medium: 250ms ease;
+  --venner-transition-slow: 350ms ease;
+  
+  /* Font */
+  --venner-font: system-ui, -apple-system, sans-serif;
+  --venner-font-mono: ui-monospace, monospace;
+}

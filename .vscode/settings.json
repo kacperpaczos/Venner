@@ -1,0 +1,12 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.cargo.features": "all",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/target": true,
+    "**/dist": true
+  }
+}
