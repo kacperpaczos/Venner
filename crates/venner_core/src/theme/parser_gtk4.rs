@@ -67,7 +67,10 @@ fn find_button_block(css: &str, selector_contains: &str) -> Option<String> {
         if !check.contains("button") {
             continue;
         }
-        if needle == "button " && (check.contains("button:") || !check.contains(", button ") && !check.starts_with("button ") {
+        if needle == "button "
+            && (check.contains("button:")
+                || (!check.contains(", button ") && !check.starts_with("button ")))
+        {
             continue;
         }
         if !needle.is_empty() && !check.contains(needle.trim()) {
@@ -186,8 +189,14 @@ mod tests {
         let colors = parse_define_colors(css);
         assert!(colors.contains_key("theme_bg_color"));
         assert!(colors.contains_key("accent_color"));
-        assert_eq!(colors.get("theme_bg_color").map(|s| s.as_str()), Some("#353535"));
-        assert_eq!(colors.get("accent_color").map(|s| s.as_str()), Some("#3584E4"));
+        assert_eq!(
+            colors.get("theme_bg_color").map(|s| s.as_str()),
+            Some("#353535")
+        );
+        assert_eq!(
+            colors.get("accent_color").map(|s| s.as_str()),
+            Some("#3584E4")
+        );
     }
 
     #[test]
@@ -196,8 +205,14 @@ mod tests {
         colors.insert("theme_bg_color".to_string(), "#353535".to_string());
         colors.insert("accent_color".to_string(), "#3584E4".to_string());
         let tokens = map_gtk4_to_venner_tokens(&colors);
-        assert_eq!(tokens.get("--venner-bg").map(|s| s.as_str()), Some("#353535"));
-        assert_eq!(tokens.get("--venner-accent").map(|s| s.as_str()), Some("#3584E4"));
+        assert_eq!(
+            tokens.get("--venner-bg").map(|s| s.as_str()),
+            Some("#353535")
+        );
+        assert_eq!(
+            tokens.get("--venner-accent").map(|s| s.as_str()),
+            Some("#3584E4")
+        );
     }
 
     #[test]

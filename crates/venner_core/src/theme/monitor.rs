@@ -3,9 +3,10 @@
 use super::parser_gtk3;
 use super::parser_gtk4;
 use super::path;
-use super::resolver::{self, ColorScheme, ThemeGtkVersion};
+use super::resolver::{self, ThemeGtkVersion};
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
+use tauri::Emitter;
 use std::process::{Command, Stdio};
 use std::thread;
 
@@ -30,7 +31,9 @@ pub fn load_theme_tokens() -> HashMap<String, String> {
         }
     }
 
-    let Some((path, version)) = resolver::resolve_theme_css_path(&settings.gtk_theme, settings.color_scheme) else {
+    let Some((path, version)) =
+        resolver::resolve_theme_css_path(&settings.gtk_theme, settings.color_scheme)
+    else {
         return default_tokens();
     };
     let Ok(css) = std::fs::read_to_string(&path) else {

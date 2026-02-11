@@ -50,16 +50,18 @@ pub fn detect_desktop() -> DesktopEnv {
 }
 
 fn gsettings_get(schema: &str, key: &str) -> Option<String> {
-    let out = Command::new("gsettings").args(["get", schema, key]).output().ok()?;
+    let out = Command::new("gsettings")
+        .args(["get", schema, key])
+        .output()
+        .ok()?;
     if !out.status.success() {
         return None;
     }
-    let s = String::from_utf8_lossy(&out.stdout).trim().trim_matches('\'').to_string();
-    if s.is_empty() {
-        None
-    } else {
-        Some(s)
-    }
+    let s = String::from_utf8_lossy(&out.stdout)
+        .trim()
+        .trim_matches('\'')
+        .to_string();
+    if s.is_empty() { None } else { Some(s) }
 }
 
 pub fn read_theme_settings() -> ThemeSettings {
@@ -86,10 +88,15 @@ pub fn read_theme_settings() -> ThemeSettings {
         }
     };
 
-    let accent_color = if has_accent { gsettings_get(schema, "accent-color") } else { None };
+    let accent_color = if has_accent {
+        gsettings_get(schema, "accent-color")
+    } else {
+        None
+    };
     let font_name = gsettings_get(schema, "font-name").unwrap_or_else(|| "Sans 11".to_string());
     let icon_theme = gsettings_get(schema, "icon-theme").unwrap_or_else(|| "Adwaita".to_string());
-    let cursor_theme = gsettings_get(schema, "cursor-theme").unwrap_or_else(|| "Adwaita".to_string());
+    let cursor_theme =
+        gsettings_get(schema, "cursor-theme").unwrap_or_else(|| "Adwaita".to_string());
 
     ThemeSettings {
         gtk_theme,
@@ -139,7 +146,10 @@ pub fn detect_theme_gtk_version(theme_dir: &Path) -> ThemeGtkVersion {
     }
 }
 
-pub fn resolve_theme_css_path(theme_name: &str, color_scheme: ColorScheme) -> Option<(PathBuf, ThemeGtkVersion)> {
+pub fn resolve_theme_css_path(
+    theme_name: &str,
+    color_scheme: ColorScheme,
+) -> Option<(PathBuf, ThemeGtkVersion)> {
     let variant = match color_scheme {
         ColorScheme::PreferDark => "gtk-dark.css",
         ColorScheme::PreferLight => "gtk-light.css",

@@ -54,7 +54,10 @@ fn project_theme_subdir(gtk_theme: &str) -> &'static str {
 }
 
 /// Ścieżka do pliku CSS i wariant wg color_scheme dla danego podkatalogu.
-fn project_theme_filename(subdir: &str, color_scheme: ColorScheme) -> (&'static str, ThemeGtkVersion) {
+fn project_theme_filename(
+    subdir: &str,
+    color_scheme: ColorScheme,
+) -> (&'static str, ThemeGtkVersion) {
     match subdir {
         "default-gtk4" => (
             match color_scheme {

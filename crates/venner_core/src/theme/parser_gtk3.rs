@@ -68,7 +68,11 @@ fn resolve_value(value: &str) -> String {
 
     if let Some(cap) = shade_re.captures(value) {
         let color = cap[1].trim().trim_start_matches('#');
-        let hex = if color.starts_with('#') { color.to_string() } else { format!("#{}", color) };
+        let hex = if color.starts_with('#') {
+            color.to_string()
+        } else {
+            format!("#{}", color)
+        };
         let factor: f64 = cap[2].parse().unwrap_or(1.0);
         if let Some(s) = eval_shade(&hex, factor) {
             return s;
@@ -164,7 +168,10 @@ mod tests {
 
     #[test]
     fn eval_alpha_black() {
-        assert_eq!(eval_alpha("black", 0.35).as_deref(), Some("rgba(0, 0, 0, 0.35)"));
+        assert_eq!(
+            eval_alpha("black", 0.35).as_deref(),
+            Some("rgba(0, 0, 0, 0.35)")
+        );
     }
 
     #[test]
@@ -173,7 +180,10 @@ mod tests {
         let colors = parse_define_colors(css);
         assert!(colors.contains_key("theme_bg_color"));
         assert!(colors.contains_key("theme_fg_color"));
-        assert_eq!(colors.get("theme_bg_color").map(|s| s.as_str()), Some("#353535"));
+        assert_eq!(
+            colors.get("theme_bg_color").map(|s| s.as_str()),
+            Some("#353535")
+        );
     }
 
     #[test]
