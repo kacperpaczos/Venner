@@ -143,3 +143,6 @@ target/
 
 # Bun lockfile (optional – usuń jeśli chcesz committować dla reprodukowalnych instalacji)
 bun.lock
+
+# Turborepo cache
+.turbo/
