@@ -6,12 +6,12 @@
 // - Type definitions (will be Specta-generated)
 
 export { invoke } from "./api/invoke";
-export { listen, events } from "./api/listen";
+export { events, listen } from "./api/listen";
 export { store } from "./store";
 export type {
-  AppState,
-  WindowState,
-  WidgetState,
-  ThemeTokens,
-  Action,
+	Action,
+	AppState,
+	ThemeTokens,
+	WidgetState,
+	WindowState,
 } from "./types";
