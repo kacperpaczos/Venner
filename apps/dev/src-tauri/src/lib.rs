@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use venner_core::app_state::{AppState, ThemeTokens};
-use venner_core::commands::{dispatch, get_gtk_theme, get_state, inject_state};
 use venner_core::theme_monitor;
 use venner_core::VennerStore;
 
@@ -22,7 +21,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(VennerStore::new(default_app_state()))
-        .invoke_handler(tauri::generate_handler![dispatch, get_state, inject_state, get_gtk_theme])
+        .invoke_handler(tauri::generate_handler![
+            venner_core::commands::dispatch,
+            venner_core::commands::get_state,
+            venner_core::commands::inject_state,
+            venner_core::commands::get_gtk_theme,
+        ])
         .setup(|app| {
             theme_monitor::start_theme_monitor(app.handle().clone());
             Ok(())
