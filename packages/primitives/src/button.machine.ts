@@ -15,6 +15,8 @@ export interface ButtonContext {
   hovered: boolean;
   size: "sm" | "md" | "lg";
   variant: "primary" | "secondary" | "ghost" | "link";
+  /** Called when button is activated (click or Enter/Space). */
+  onClick?: () => void;
 }
 
 export const buttonMachine = createMachine({
@@ -105,8 +107,8 @@ export const buttonMachine = createMachine({
     clearFocused: (ctx) => ({ ...ctx, focused: false }),
     setPressed: (ctx) => ({ ...ctx, pressed: true }),
     clearPressed: (ctx) => ({ ...ctx, pressed: false }),
-    dispatchClick: () => {
-      // Dispatch to Venner Store
+    dispatchClick: (ctx) => {
+      (ctx as ButtonContext).onClick?.();
     },
   },
 

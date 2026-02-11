@@ -16,6 +16,7 @@ export function Button(props: ButtonProps) {
       disabled: props.disabled ?? false,
       variant: props.variant ?? "primary",
       size: props.size ?? "md",
+      onClick: props.onClick,
     },
   });
 
@@ -23,7 +24,11 @@ export function Button(props: ButtonProps) {
 
   return (
     <button
+      type="button"
       class="venner-button"
+      role="button"
+      aria-pressed={api.pressed}
+      aria-disabled={api.disabled}
       data-variant={props.variant}
       data-size={props.size}
       data-disabled={api.disabled}
@@ -31,16 +36,17 @@ export function Button(props: ButtonProps) {
       data-pressed={api.pressed}
       data-focused={api.focused}
       disabled={api.disabled}
-      onClick={() => {
-        props.onClick?.();
-        send("CLICK");
-      }}
       onMouseEnter={() => send("POINTER_ENTER")}
       onMouseLeave={() => send("POINTER_LEAVE")}
       onMouseDown={() => send("POINTER_DOWN")}
       onMouseUp={() => send("POINTER_UP")}
       onFocus={() => send("FOCUS")}
       onBlur={() => send("BLUR")}
+      onKeyDown={(e: KeyboardEvent) => {
+        if (e.key === " " || e.key === "Enter") e.preventDefault();
+        send({ type: "KEY_DOWN", key: e.key });
+      }}
+      onKeyUp={(e: KeyboardEvent) => send({ type: "KEY_UP", key: e.key })}
     >
       {props.children}
     </button>

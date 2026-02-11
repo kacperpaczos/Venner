@@ -4,18 +4,19 @@
   justify-content: center;
   gap: 8px;
   padding: var(--venner-btn-padding, 6px 12px);
-  min-height: 36px;
+  min-height: var(--venner-btn-min-height, 36px);
   min-width: 36px;
   background: var(--venner-btn-bg);
   color: var(--venner-btn-fg);
-  border: none;
+  border: 1px solid var(--venner-btn-border, transparent);
   border-radius: var(--venner-btn-radius, 6px);
+  box-shadow: var(--venner-btn-shadow, none);
   font-family: var(--venner-font);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
-  transition: all var(--venner-transition-fast);
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .venner-button[data-disabled="true"] {
