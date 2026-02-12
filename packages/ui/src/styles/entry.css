@@ -1,0 +1,29 @@
+.venner-entry {
+	padding: var(--venner-entry-padding, 6px 10px);
+	min-height: var(--venner-entry-min-height, 36px);
+	min-width: 220px;
+	background: var(--venner-entry-bg, var(--venner-bg, #ffffff));
+	color: var(--venner-entry-fg, var(--venner-fg, #222));
+	border: 1px solid var(--venner-entry-border, var(--venner-border, #c5c9d3));
+	border-radius: var(--venner-entry-radius, 8px);
+	font-family: var(--venner-font, Inter, sans-serif);
+	font-size: 14px;
+	line-height: 1.2;
+	transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.venner-entry::placeholder {
+	color: var(--venner-entry-placeholder, #7a818f);
+}
+
+.venner-entry:focus-visible {
+	outline: none;
+	border-color: var(--venner-entry-focus-border, var(--venner-btn-accent, #3b82f6));
+	box-shadow: 0 0 0 3px var(--venner-entry-focus-ring, rgba(59, 130, 246, 0.2));
+}
+
+.venner-entry:disabled {
+	background: var(--venner-entry-disabled-bg, #f2f3f7);
+	color: var(--venner-entry-disabled-fg, #8a90a0);
+	cursor: not-allowed;
+}

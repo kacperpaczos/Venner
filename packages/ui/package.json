@@ -8,7 +8,8 @@
 			"default": "./src/index.ts"
 		},
 		"./styles/tokens.css": "./src/styles/tokens.css",
-		"./styles/button.css": "./src/styles/button.css"
+		"./styles/button.css": "./src/styles/button.css",
+		"./styles/entry.css": "./src/styles/entry.css"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.0"
