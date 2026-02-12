@@ -1,4 +1,4 @@
-use crate::state::{Action, AppState, VennerStore};
+use crate::state::{Action, AppState, ImportResult, ValidationReport, VennerStore};
 use crate::theme::monitor;
 use std::collections::HashMap;
 
@@ -16,6 +16,32 @@ pub fn get_state(store: tauri::State<VennerStore>) -> AppState {
 #[tauri::command]
 pub fn inject_state(store: tauri::State<VennerStore>, state: AppState) {
     store.inject_state(state);
+}
+
+#[tauri::command]
+pub fn get_schema_version(store: tauri::State<VennerStore>) -> u32 {
+    store.schema_version()
+}
+
+#[tauri::command]
+pub fn export_state(store: tauri::State<VennerStore>) -> Result<String, String> {
+    store.export_state_json(env!("CARGO_PKG_VERSION"))
+}
+
+#[tauri::command]
+pub fn validate_state(
+    store: tauri::State<VennerStore>,
+    json: String,
+) -> Result<ValidationReport, String> {
+    Ok(store.validate_state_json(&json))
+}
+
+#[tauri::command]
+pub fn import_state(
+    store: tauri::State<VennerStore>,
+    json: String,
+) -> Result<ImportResult, String> {
+    Ok(store.import_state_json(&json))
 }
 
 /// Return current GTK theme as Venner CSS tokens (--venner-* keys).

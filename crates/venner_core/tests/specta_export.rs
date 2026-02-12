@@ -1,11 +1,13 @@
 use std::fs;
 use std::path::PathBuf;
-use venner_core::{Action, AppState, ThemeTokens, WidgetState, WindowState};
+use venner_core::{
+    Action, AppState, ImportResult, PersistedAppState, ThemeTokens, ValidationReport, WidgetState,
+    WindowState,
+};
 
 #[test]
 fn specta_export() {
-    let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../packages/core/src/types");
+    let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../packages/core/src/types");
     fs::create_dir_all(&out_dir).expect("failed to create types output directory");
 
     let out_file = out_dir.join("generated.ts");
@@ -36,8 +38,19 @@ fn specta_export() {
             .expect("failed to export AppState"),
     );
     lines.push(
-        specta_typescript::export::<Action>(&Default::default())
-            .expect("failed to export Action"),
+        specta_typescript::export::<PersistedAppState>(&Default::default())
+            .expect("failed to export PersistedAppState"),
+    );
+    lines.push(
+        specta_typescript::export::<ValidationReport>(&Default::default())
+            .expect("failed to export ValidationReport"),
+    );
+    lines.push(
+        specta_typescript::export::<ImportResult>(&Default::default())
+            .expect("failed to export ImportResult"),
+    );
+    lines.push(
+        specta_typescript::export::<Action>(&Default::default()).expect("failed to export Action"),
     );
 
     let output = lines.join("\n\n");
