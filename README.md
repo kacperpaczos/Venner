@@ -52,3 +52,7 @@ VENNER_THEMES_DIR=<themes_dir> bun run dev
 ```
 
 See also: `resources/themes/README.md`.
+
+## GTK Parity
+
+Parity methodology and reference GJS apps are documented in `tools/gtk-reference/README.md`.
