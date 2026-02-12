@@ -5,7 +5,7 @@ import "@venner/ui/styles/button.css";
 
 interface ButtonProps {
 	children?: string;
-	variant?: "primary" | "secondary" | "ghost" | "link";
+	variant?: "default" | "suggested" | "destructive" | "secondary" | "ghost" | "link";
 	size?: "sm" | "md" | "lg";
 	disabled?: boolean;
 	onClick?: () => void;
@@ -14,7 +14,7 @@ interface ButtonProps {
 export function Button(props: ButtonProps) {
 	const service = useMachine(buttonMachine, {
 		disabled: props.disabled ?? false,
-		variant: props.variant ?? "primary",
+		variant: props.variant ?? "default",
 		size: props.size ?? "md",
 		onClick: props.onClick,
 	});

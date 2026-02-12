@@ -9,7 +9,9 @@
 		},
 		"./styles/tokens.css": "./src/styles/tokens.css",
 		"./styles/button.css": "./src/styles/button.css",
-		"./styles/entry.css": "./src/styles/entry.css"
+		"./styles/entry.css": "./src/styles/entry.css",
+		"./styles/switch.css": "./src/styles/switch.css",
+		"./styles/tabs.css": "./src/styles/tabs.css"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.0"
