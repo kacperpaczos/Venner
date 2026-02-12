@@ -23,3 +23,9 @@ pub fn inject_state(store: tauri::State<VennerStore>, state: AppState) {
 pub fn get_gtk_theme() -> Result<HashMap<String, String>, String> {
     Ok(monitor::load_theme_tokens())
 }
+
+/// Return diagnostics for GTK theme loading pipeline.
+#[tauri::command]
+pub fn get_gtk_theme_diagnostics() -> Result<monitor::ThemeDiagnostics, String> {
+    Ok(monitor::load_theme_with_diagnostics().1)
+}
