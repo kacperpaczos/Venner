@@ -13,6 +13,11 @@ const app = new Gtk.Application({
 	flags: Gio.ApplicationFlags.FLAGS_NONE,
 });
 
+app.connect("startup", () => {
+	const settings = Gtk.Settings.get_default();
+	if (settings) settings.set_property("gtk-application-prefer-dark-theme", true);
+});
+
 app.connect("activate", () => {
 	const win = new Gtk.ApplicationWindow({
 		application: app,
