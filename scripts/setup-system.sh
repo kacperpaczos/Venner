@@ -35,8 +35,8 @@ echo
 require_cmd sudo
 require_cmd curl
 
-# --- 2. Pakiety systemowe dla Tauri 2.x ---
-log_info "Etap 2/4: Instalacja pakietów systemowych (Tauri 2.x)..."
+# --- 2. Pakiety systemowe dla Tauri 2.x + GTK reference apps ---
+log_info "Etap 2/4: Instalacja pakietów systemowych (Tauri 2.x + GTK ref)..."
 
 TAURI_DEPS=(
   build-essential
@@ -54,9 +54,15 @@ TAURI_DEPS=(
   wget
 )
 
+GTK_REF_DEPS=(
+  gjs
+  gir1.2-gtk-4.0
+  gir1.2-adw-1
+)
+
 sudo apt-get update -qq
-sudo apt-get install -y "${TAURI_DEPS[@]}"
-log_ok "Pakiety systemowe zainstalowane"
+sudo apt-get install -y "${TAURI_DEPS[@]}" "${GTK_REF_DEPS[@]}"
+log_ok "Pakiety systemowe zainstalowane (Tauri + GTK reference)"
 echo
 
 # --- 3. Rust ---
@@ -118,4 +124,5 @@ echo "  ./scripts/build-lib.sh      # przebudowa bibliotek (TS + Rust)"
 echo "  ./scripts/check.sh          # statyczne checki i lintery"
 echo "  ./scripts/test.sh           # testy JS/TS i Rust"
 echo "  ./scripts/dev.sh            # rebuild + uruchomienie app dev"
+echo "  ./scripts/run-gtk-ref.sh    # GTK4/Libadwaita reference apps"
 echo

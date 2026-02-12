@@ -16,6 +16,7 @@ Ten katalog zawiera cały workflow po `git clone`.
 - `check.sh` - uruchamia statyczne checki i lintery (bez testów i bez instalacji deps).
 - `test.sh` - uruchamia testy JS/TS i Rust.
 - `dev.sh` - zawsze czyści deps JS, robi install deps, przebudowuje workspace (chyba że `--skip-build`) i startuje appkę dev.
+- `run-gtk-ref.sh` - uruchamia referencyjne appki GJS (GTK4 i/lub Libadwaita) do parity workflow.
 
 ## Kontrakt skryptów
 
@@ -37,6 +38,9 @@ Ten katalog zawiera cały workflow po `git clone`.
 - `dev.sh`
   - robi: clean node_modules + install deps + (opcjonalnie) build + `bun run dev`,
   - nie robi: setup systemowy.
+- `run-gtk-ref.sh`
+  - robi: uruchamia appki GJS z `tools/gtk-reference/` (gtk4 i/lub libadwaita),
+  - nie robi: setup systemowy, install deps ani Venner dev.
 
 ## Typowa kolejność
 
