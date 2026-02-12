@@ -11,6 +11,7 @@
 	"scripts": {
 		"build": "turbo run build",
 		"dev": "turbo run dev",
+		"dev:app": "cd apps/dev && bunx tauri dev",
 		"lint": "turbo run lint",
 		"test": "bun test",
 		"typecheck": "turbo run typecheck",
