@@ -50,11 +50,24 @@ pub fn run() {
             venner_core::commands::get_state,
             venner_core::commands::inject_state,
             venner_core::commands::get_gtk_theme,
+            venner_core::commands::get_gtk_theme_diagnostics,
             log_to_terminal,
         ])
         .setup(|app| {
-            app.state::<VennerStore>().set_app_handle(app.handle().clone());
+            app.state::<VennerStore>()
+                .set_app_handle(app.handle().clone());
             theme_monitor::start_theme_monitor(app.handle().clone());
+            let (_, diagnostics) = theme_monitor::load_theme_with_diagnostics();
+            log::info!(
+                "[theme] startup source={} theme={} scheme={} path={} gtk={} tokens={} reason={}",
+                diagnostics.source,
+                diagnostics.gtk_theme,
+                diagnostics.color_scheme,
+                diagnostics.resolved_css_path.as_deref().unwrap_or("<none>"),
+                diagnostics.resolved_gtk_version,
+                diagnostics.tokens_count,
+                diagnostics.fallback_reason.as_deref().unwrap_or("none"),
+            );
             log::info!("Venner dev app started — logging to stdout enabled");
             Ok(())
         })
