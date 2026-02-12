@@ -105,8 +105,21 @@ if ! command -v bun &>/dev/null; then
   NEED_BUN=true
   log_warn "Bun nie znaleziony - instalacja via oficjalny skrypt..."
 else
-  BUN_VER=$(bun --version 2>/dev/null || echo "0.0.0")
-  log_ok "Bun $BUN_VER - OK"
+  BUN_VER=$(bun --version 2>/dev/null | tr -d 'v\r\n' || echo "0.0.0")
+  BUN_MAJOR="${BUN_VER%%.*}"
+  BUN_REST="${BUN_VER#*.}"
+  BUN_MINOR="${BUN_REST%%.*}"
+  BUN_PATCH="${BUN_REST#*.}"
+  BUN_PATCH="${BUN_PATCH%%.*}"
+  BUN_PATCH="${BUN_PATCH:-0}"
+  if [[ "$BUN_MAJOR" -lt 1 ]] ||
+    { [[ "$BUN_MAJOR" -eq 1 ]] && [[ "$BUN_MINOR" -lt 3 ]]; } ||
+    { [[ "$BUN_MAJOR" -eq 1 ]] && [[ "$BUN_MINOR" -eq 3 ]] && [[ "${BUN_PATCH:-0}" -lt 8 ]]; }; then
+    NEED_BUN=true
+    log_warn "Bun $BUN_VER < 1.3.8 - aktualizacja via oficjalny skrypt..."
+  else
+    log_ok "Bun $BUN_VER - OK"
+  fi
 fi
 
 if [[ "$NEED_BUN" == "true" ]]; then
