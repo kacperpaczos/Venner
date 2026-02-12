@@ -22,13 +22,11 @@ app.connect("activate", () => {
 		default_height: 700,
 	});
 
+	const headerBar = new Adw.HeaderBar();
+
 	const content = new Gtk.Box({
 		orientation: Gtk.Orientation.VERTICAL,
-		spacing: 16,
-		margin_top: 16,
-		margin_bottom: 16,
-		margin_start: 16,
-		margin_end: 16,
+		spacing: 24,
 	});
 
 	content.append(buildButtonScene());
@@ -36,9 +34,19 @@ app.connect("activate", () => {
 	content.append(buildSwitchScene());
 	content.append(buildTabsScene());
 
+	const clamp = new Adw.Clamp({
+		maximum_size: 800,
+	});
+	clamp.set_child(content);
+
 	const scroll = new Gtk.ScrolledWindow({ hexpand: true, vexpand: true });
-	scroll.set_child(content);
-	win.set_content(scroll);
+	scroll.set_child(clamp);
+
+	const toolbarView = new Adw.ToolbarView();
+	toolbarView.add_top_bar(headerBar);
+	toolbarView.content = scroll;
+
+	win.set_content(toolbarView);
 	win.present();
 });
 
