@@ -2,6 +2,7 @@
 
 `apps/dev` is the reference application for the Venner framework.
 It demonstrates the full flow: Rust/Tauri store + theme extraction + Solid adapter + UI primitives.
+GTK4/Libadwaita parity references live in `tools/gtk-reference/README.md`.
 
 ## Run
 
