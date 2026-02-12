@@ -15,5 +15,8 @@ thiserror = { workspace = true }
 regex = "1"
 dirs = "5"
 
+[dev-dependencies]
+specta-typescript = { workspace = true }
+
 [lib]
 crate-type = ["lib"]
