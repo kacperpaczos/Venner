@@ -1,62 +1,63 @@
-import { invoke } from "./api/invoke";
+import { invoke, store as coreStoreApi } from "./api/invoke";
 import { listen } from "./api/listen";
+import type { AppState, ImportResult, ValidationReport } from "./types";
 
 /**
  * VennerStore - JavaScript projection of Rust store
- *
- * This is a thin client that communicates with the Rust store
- * via Tauri IPC. All state mutations go through dispatch().
  */
 class VennerStore {
-	private state: unknown = null;
-	private subscribers = new Set<(state: unknown) => void>();
+	private state: AppState | null = null;
+	private subscribers = new Set<(state: AppState) => void>();
 
 	async init() {
-		// Get initial state from Rust
-		this.state = await invoke<unknown>("get_state");
+		this.state = await coreStoreApi.getState();
 
-		// Subscribe to state changes
-		await listen<unknown>("state:changed", (newState) => {
+		await listen<AppState>("state:changed", (newState) => {
 			this.state = newState;
 			this.notify();
 		});
 	}
 
-	/**
-	 * Dispatch an action to the Rust store
-	 */
 	dispatch(action: unknown) {
 		return invoke<void>("dispatch", { action });
 	}
 
-	/**
-	 * Get current state (local cache)
-	 */
-	getState(): unknown {
+	getState(): AppState | null {
 		return this.state;
 	}
 
-	/**
-	 * Subscribe to state changes
-	 */
-	subscribe(fn: (state: unknown) => void): () => void {
+	selectWidgetState(widgetId: string) {
+		return this.state?.widgets?.[widgetId] ?? null;
+	}
+
+	subscribe(fn: (state: AppState) => void): () => void {
 		this.subscribers.add(fn);
+		if (this.state) fn(this.state);
 		return () => this.subscribers.delete(fn);
 	}
 
-	/**
-	 * Inject full state (for debugging/time-travel)
-	 */
-	inject(state: unknown) {
-		return invoke<void>("inject_state", { state });
+	inject(state: AppState) {
+		return coreStoreApi.injectState(state);
+	}
+
+	exportSnapshot(): Promise<string> {
+		return coreStoreApi.exportState();
+	}
+
+	validateSnapshot(json: string): Promise<ValidationReport> {
+		return coreStoreApi.validateState(json);
+	}
+
+	importSnapshot(json: string): Promise<ImportResult> {
+		return coreStoreApi.importState(json);
 	}
 
 	private notify() {
+		if (!this.state) return;
 		for (const fn of this.subscribers) {
 			fn(this.state);
 		}
 	}
 }
 
-// Singleton instance
 export const store = new VennerStore();

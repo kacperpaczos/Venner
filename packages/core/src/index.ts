@@ -11,9 +11,14 @@ export { store } from "./store";
 export type {
 	Action,
 	AppState,
+	ImportResult,
+	PersistedAppState,
+	SessionState,
 	ThemeDiagnostics,
 	ThemeSource,
 	ThemeTokens,
+	UiState,
+	ValidationReport,
 	WidgetState,
 	WindowState,
 } from "./types";

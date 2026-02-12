@@ -1,5 +1,5 @@
 import { listen as tauriListen } from "@tauri-apps/api/event";
-import type { ThemeDiagnostics } from "../types";
+import type { AppState, ThemeDiagnostics } from "../types";
 
 /**
  * Listen to Tauri events with type-safe payload
@@ -17,8 +17,8 @@ export function listen<T>(
  * Predefined event listeners for Venner Store
  */
 export const events = {
-	onStateChange: (handler: (state: unknown) => void) =>
-		listen<unknown>("state:changed", handler),
+	onStateChange: (handler: (state: AppState) => void) =>
+		listen<AppState>("state:changed", handler),
 
 	onActionDispatched: (handler: (action: unknown) => void) =>
 		listen<unknown>("action:dispatched", handler),
@@ -28,4 +28,10 @@ export const events = {
 
 	onThemeDiagnostics: (handler: (diagnostics: ThemeDiagnostics) => void) =>
 		listen<ThemeDiagnostics>("theme:diagnostics", handler),
+
+	onRehydrateStarted: (handler: (payload: Record<string, unknown>) => void) =>
+		listen<Record<string, unknown>>("rehydrate:started", handler),
+
+	onRehydrateCompleted: (handler: (state: AppState) => void) =>
+		listen<AppState>("rehydrate:completed", handler),
 };
