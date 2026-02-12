@@ -2,6 +2,19 @@
  * Load GNOME/GTK theme tokens from Rust backend (get_gtk_theme command).
  */
 
+export interface ThemeDiagnostics {
+	desktop_env: string;
+	schema: string;
+	gtk_theme: string;
+	color_scheme: string;
+	source: "system" | "project" | "default";
+	resolved_css_path: string | null;
+	resolved_gtk_version: string;
+	fallback_reason: string | null;
+	tokens_count: number;
+	loaded_at: number;
+}
+
 export interface GnomeThemeConfig {
 	name: string;
 	colors: {
@@ -23,6 +36,12 @@ export interface GnomeThemeConfig {
 export async function getThemeTokens(): Promise<Record<string, string>> {
 	const { invoke } = await import("@venner/core");
 	return invoke<Record<string, string>>("get_gtk_theme");
+}
+
+/** Fetch diagnostics for the theme loading pipeline. */
+export async function getThemeDiagnostics(): Promise<ThemeDiagnostics> {
+	const { invoke } = await import("@venner/core");
+	return invoke<ThemeDiagnostics>("get_gtk_theme_diagnostics");
 }
 
 /** Build legacy config from tokens for compatibility. */

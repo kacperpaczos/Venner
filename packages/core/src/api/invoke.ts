@@ -1,4 +1,5 @@
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
+import type { ThemeDiagnostics } from "../types";
 
 /**
  * Invoke a Tauri command with type-safe arguments
@@ -17,4 +18,7 @@ export const store = {
 	dispatch: (action: unknown) => invoke<void>("dispatch", { action }),
 	getState: () => invoke<unknown>("get_state"),
 	injectState: (state: unknown) => invoke<void>("inject_state", { state }),
+	getGtkTheme: () => invoke<Record<string, string>>("get_gtk_theme"),
+	getGtkThemeDiagnostics: () =>
+		invoke<ThemeDiagnostics>("get_gtk_theme_diagnostics"),
 };

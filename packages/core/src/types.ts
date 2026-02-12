@@ -35,6 +35,21 @@ export interface ThemeTokens {
 	accent: string;
 }
 
+export type ThemeSource = "system" | "project" | "default";
+
+export interface ThemeDiagnostics {
+	desktop_env: string;
+	schema: string;
+	gtk_theme: string;
+	color_scheme: string;
+	source: ThemeSource;
+	resolved_css_path: string | null;
+	resolved_gtk_version: string;
+	fallback_reason: string | null;
+	tokens_count: number;
+	loaded_at: number;
+}
+
 export type Action =
 	| { type: "WidgetUpdate"; widget_id: string; field: string; value: unknown }
 	| { type: "WindowResize"; window_id: string; width: number; height: number }

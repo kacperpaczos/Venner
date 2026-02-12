@@ -11,6 +11,8 @@ export { store } from "./store";
 export type {
 	Action,
 	AppState,
+	ThemeDiagnostics,
+	ThemeSource,
 	ThemeTokens,
 	WidgetState,
 	WindowState,
