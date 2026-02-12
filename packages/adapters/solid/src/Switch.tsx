@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import "@venner/ui/styles/switch.css";
 
 interface SwitchProps {
@@ -9,6 +9,10 @@ interface SwitchProps {
 
 export function Switch(props: SwitchProps) {
 	const [checked, setChecked] = createSignal(Boolean(props.checked));
+
+	createEffect(() => {
+		setChecked(Boolean(props.checked));
+	});
 
 	const toggle = () => {
 		if (props.disabled) return;

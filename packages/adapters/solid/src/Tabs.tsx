@@ -1,4 +1,4 @@
-import { For, createSignal } from "solid-js";
+import { For, createEffect, createSignal } from "solid-js";
 import "@venner/ui/styles/tabs.css";
 
 export interface TabItem {
@@ -10,11 +10,19 @@ export interface TabItem {
 interface TabsProps {
 	items: TabItem[];
 	defaultTabId?: string;
+	activeTabId?: string;
+	onChange?: (tabId: string) => void;
 }
 
 export function Tabs(props: TabsProps) {
 	const first = () => props.items[0]?.id ?? "";
-	const [activeId, setActiveId] = createSignal(props.defaultTabId ?? first());
+	const [activeId, setActiveId] = createSignal(
+		props.activeTabId ?? props.defaultTabId ?? first(),
+	);
+
+	createEffect(() => {
+		if (props.activeTabId) setActiveId(props.activeTabId);
+	});
 
 	return (
 		<div class="venner-tabs">
@@ -27,7 +35,10 @@ export function Tabs(props: TabsProps) {
 							class="venner-tab"
 							data-active={activeId() === item.id}
 							aria-selected={activeId() === item.id}
-							onClick={() => setActiveId(item.id)}
+							onClick={() => {
+								setActiveId(item.id);
+								props.onChange?.(item.id);
+							}}
 						>
 							{item.label}
 						</button>
