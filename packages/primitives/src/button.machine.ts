@@ -1,118 +1,110 @@
 import { createMachine } from "@zag-js/core";
 
-/**
- * Button machine - headless state machine for button component
- *
- * Handles: hover, focus, active, disabled states
- * Framework-agnostic - can be used with Solid, React, Vue, etc.
- */
-
-export interface ButtonContext {
-	pressed: boolean;
-	checked: boolean;
-	disabled: boolean;
-	focused: boolean;
-	hovered: boolean;
-	size: "sm" | "md" | "lg";
-	variant: "primary" | "secondary" | "ghost" | "link";
-	/** Called when button is activated (click or Enter/Space). */
+export interface ButtonProps {
+	disabled?: boolean;
+	variant?: "primary" | "secondary" | "ghost" | "link";
+	size?: "sm" | "md" | "lg";
 	onClick?: () => void;
 }
 
 export const buttonMachine = createMachine({
 	id: "button",
-	initial: "idle",
 
-	context: {
-		pressed: false,
-		checked: false,
-		disabled: false,
-		focused: false,
-		hovered: false,
-		size: "md",
-		variant: "primary",
-	} as ButtonContext,
+	props({ props }: any) {
+		return {
+			disabled: false,
+			variant: "primary",
+			size: "md",
+			onClick: undefined,
+			...props,
+		};
+	},
+
+	initialState() {
+		return "idle";
+	},
+
+	context({ bindable }: any) {
+		return {
+			pressed: bindable(() => ({ defaultValue: false })),
+			focused: bindable(() => ({ defaultValue: false })),
+			hovered: bindable(() => ({ defaultValue: false })),
+		};
+	},
 
 	states: {
 		idle: {
 			on: {
-				POINTER_ENTER: { target: "hover", actions: ["setHovered"] },
-				POINTER_LEAVE: { actions: ["clearHovered"] },
-				FOCUS: { target: "focused", actions: ["setFocused"] },
-				BLUR: { actions: ["clearFocused"] },
-				KEY_DOWN: {
-					guard: "isEnterOrSpace",
-					actions: ["setPressed"],
-				},
+				POINTER_ENTER: [{ guard: "canInteract", target: "hover", actions: ["setHovered"] }],
+				FOCUS: [{ guard: "canInteract", target: "focused", actions: ["setFocused"] }],
+				KEY_DOWN: [{ guard: "isActivationKey", target: "active", actions: ["setPressed"] }],
+				BLUR: [{ actions: ["clearFocused"] }],
+				POINTER_LEAVE: [{ actions: ["clearHovered", "clearPressed"] }],
 			},
 		},
 
 		hover: {
 			on: {
-				POINTER_LEAVE: { target: "idle", actions: ["clearHovered"] },
-				POINTER_DOWN: { target: "active", actions: ["setPressed"] },
-				BLUR: { target: "idle", actions: ["clearFocused"] },
+				POINTER_LEAVE: [{ target: "idle", actions: ["clearHovered", "clearPressed"] }],
+				POINTER_DOWN: [{ guard: "canInteract", target: "active", actions: ["setPressed"] }],
+				FOCUS: [{ target: "focusedHover", actions: ["setFocused"] }],
+				BLUR: [{ target: "idle", actions: ["clearFocused"] }],
 			},
 		},
 
 		focused: {
 			on: {
-				BLUR: { target: "idle", actions: ["clearFocused"] },
-				POINTER_ENTER: { target: "focusedHover", actions: ["setHovered"] },
-				KEY_DOWN: {
-					guard: "isEnterOrSpace",
-					target: "active",
-					actions: ["setPressed"],
-				},
+				BLUR: [{ target: "idle", actions: ["clearFocused", "clearPressed"] }],
+				POINTER_ENTER: [{ target: "focusedHover", actions: ["setHovered"] }],
+				KEY_DOWN: [{ guard: "isActivationKey", target: "active", actions: ["setPressed"] }],
 			},
 		},
 
 		focusedHover: {
 			on: {
-				POINTER_LEAVE: { target: "focused", actions: ["clearHovered"] },
-				POINTER_DOWN: { target: "active", actions: ["setPressed"] },
+				POINTER_LEAVE: [{ target: "focused", actions: ["clearHovered"] }],
+				POINTER_DOWN: [{ guard: "canInteract", target: "active", actions: ["setPressed"] }],
+				BLUR: [{ target: "hover", actions: ["clearFocused"] }],
 			},
 		},
 
 		active: {
 			entry: ["setPressed"],
 			on: {
-				POINTER_UP: {
-					target: "hover",
-					actions: ["dispatchClick", "clearPressed"],
-				},
-				KEY_UP: {
-					guard: "isEnterOrSpace",
-					target: "focused",
-					actions: ["dispatchClick", "clearPressed"],
-				},
-				POINTER_LEAVE: {
-					target: "focused",
-					actions: ["clearPressed", "clearHovered"],
-				},
-			},
-		},
-
-		disabled: {
-			on: {
-				// No interactions in disabled state
+				POINTER_UP: [{ target: "hover", actions: ["dispatchClick", "clearPressed"] }],
+				KEY_UP: [{ guard: "isActivationKey", target: "focused", actions: ["dispatchClick", "clearPressed"] }],
+				POINTER_LEAVE: [{ target: "focused", actions: ["clearPressed", "clearHovered"] }],
+				BLUR: [{ target: "idle", actions: ["clearFocused", "clearPressed"] }],
 			},
 		},
 	},
 
-	actions: {
-		setHovered: (ctx) => ({ ...ctx, hovered: true }),
-		clearHovered: (ctx) => ({ ...ctx, hovered: false }),
-		setFocused: (ctx) => ({ ...ctx, focused: true }),
-		clearFocused: (ctx) => ({ ...ctx, focused: false }),
-		setPressed: (ctx) => ({ ...ctx, pressed: true }),
-		clearPressed: (ctx) => ({ ...ctx, pressed: false }),
-		dispatchClick: (ctx) => {
-			(ctx as ButtonContext).onClick?.();
+	implementations: {
+		guards: {
+			canInteract: ({ prop }: any) => !Boolean(prop("disabled")),
+			isActivationKey: ({
+				event,
+				prop,
+			}: any) => !Boolean(prop("disabled")) && (event.key === "Enter" || event.key === " "),
+		},
+
+		actions: {
+			setHovered: ({ context }: any) =>
+				context.set("hovered", true),
+			clearHovered: ({ context }: any) =>
+				context.set("hovered", false),
+			setFocused: ({ context }: any) =>
+				context.set("focused", true),
+			clearFocused: ({ context }: any) =>
+				context.set("focused", false),
+			setPressed: ({ context }: any) =>
+				context.set("pressed", true),
+			clearPressed: ({ context }: any) =>
+				context.set("pressed", false),
+			dispatchClick: ({ prop }: any) => {
+				const onClick = prop("onClick");
+				if (typeof onClick === "function") onClick();
+			},
 		},
 	},
-
-	guards: {
-		isEnterOrSpace: (_ctx, event) => event.key === "Enter" || event.key === " ",
-	},
-});
+} as any);
