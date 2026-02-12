@@ -19,42 +19,23 @@ None
 
 ## Development
 
-Run from the monorepo root:
+Szczegółowa instrukcja workflow skryptów jest w `scripts/README.md`.
+
+One-liner po `git clone`:
 
 ```bash
-bun install
+./scripts/setup-system.sh && ./scripts/install-deps.sh && ./scripts/build-lib.sh && ./scripts/check.sh && ./scripts/test.sh && ./scripts/dev.sh
+```
+
+### Uruchamianie dev
+
+From monorepo root:
+
+```bash
 bun run dev
 ```
 
 `bun run dev` runs the full dev pipeline (codegen -> Tauri dev -> Vite HMR).
-
-## Clean Rebuild (From Scratch)
-
-```bash
-# 1) Clean
-rm -rf node_modules
-rm -rf apps/dev/node_modules
-rm -rf target
-rm -f packages/core/src/types/generated.ts
-
-# 2) Install
-bun install
-
-# 3) Generate TypeScript types from Rust (Specta)
-bun run codegen
-
-# 4) Validate types
-bun run typecheck
-
-# 5) Build all packages/apps
-bun run build
-```
-
-## Run the Dev App
-
-```bash
-bun run dev
-```
 
 Optional theme override:
 

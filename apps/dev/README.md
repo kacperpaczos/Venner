@@ -8,6 +8,14 @@ It demonstrates the full flow: Rust/Tauri store + theme extraction + Solid adapt
 From the monorepo root:
 
 ```bash
+./scripts/setup-system.sh
+./scripts/install-deps.sh
+./scripts/build-lib.sh
+./scripts/dev.sh
+# lub szybciej (bez rebuild bibliotek):
+./scripts/dev.sh --skip-build
+
+# albo bezpośrednio:
 bun run dev
 ```
 
