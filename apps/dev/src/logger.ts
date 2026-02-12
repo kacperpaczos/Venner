@@ -25,19 +25,12 @@ export const termLog = {
 	log: (msg: string) => toTerminal("info", msg),
 } as const;
 
-// pluginLog — alternatywa gdy potrzebujesz pełnego formatu (timestamp, target)
-import {
-	trace as pt,
-	debug as pd,
-	info as pi,
-	warn as pw,
-	error as pe,
-} from "@tauri-apps/plugin-log";
-
+// pluginLog — kompatybilny fallback bez twardej zależności na @tauri-apps/plugin-log
+// Używa tej samej sygnatury co termLog.
 export const pluginLog = {
-	trace: pt,
-	debug: pd,
-	info: pi,
-	warn: pw,
-	error: pe,
+	trace: termLog.trace,
+	debug: termLog.debug,
+	info: termLog.info,
+	warn: termLog.warn,
+	error: termLog.error,
 } as const;
