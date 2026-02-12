@@ -1,61 +1,62 @@
 import { createMachine } from "@zag-js/core";
 
-/**
- * Switch machine - headless state machine for toggle/switch component
- */
-
-export interface SwitchContext {
-	checked: boolean;
-	disabled: boolean;
-	focused: boolean;
-	hovered: boolean;
+export interface SwitchProps {
+	disabled?: boolean;
+	checked?: boolean;
+	onChange?: (checked: boolean) => void;
 }
 
 export const switchMachine = createMachine({
 	id: "switch",
-	initial: "unchecked",
 
-	context: {
-		checked: false,
-		disabled: false,
-		focused: false,
-		hovered: false,
-	} as SwitchContext,
+	props({ props }: any) {
+		return {
+			disabled: false,
+			checked: false,
+			onChange: undefined,
+			...props,
+		};
+	},
+
+	initialState() {
+		return "idle";
+	},
+
+	context({ bindable, prop }: any) {
+		return {
+			checked: bindable(() => ({ defaultValue: Boolean(prop("checked")) })),
+			hovered: bindable(() => ({ defaultValue: false })),
+			focused: bindable(() => ({ defaultValue: false })),
+		};
+	},
 
 	states: {
-		unchecked: {
+		idle: {
 			on: {
-				TOGGLE: {
-					target: "checked",
-					actions: ["setChecked"],
-				},
-				POINTER_ENTER: { actions: ["setHovered"] },
-				POINTER_LEAVE: { actions: ["clearHovered"] },
-				FOCUS: { actions: ["setFocused"] },
-				BLUR: { actions: ["clearFocused"] },
-			},
-		},
-
-		checked: {
-			on: {
-				TOGGLE: {
-					target: "unchecked",
-					actions: ["clearChecked"],
-				},
-				POINTER_ENTER: { actions: ["setHovered"] },
-				POINTER_LEAVE: { actions: ["clearHovered"] },
-				FOCUS: { actions: ["setFocused"] },
-				BLUR: { actions: ["clearFocused"] },
+				TOGGLE: [{ guard: "canInteract", actions: ["toggleChecked", "emitChange"] }],
+				POINTER_ENTER: [{ actions: ["setHovered"] }],
+				POINTER_LEAVE: [{ actions: ["clearHovered"] }],
+				FOCUS: [{ actions: ["setFocused"] }],
+				BLUR: [{ actions: ["clearFocused"] }],
 			},
 		},
 	},
 
-	actions: {
-		setChecked: (ctx) => ({ ...ctx, checked: true }),
-		clearChecked: (ctx) => ({ ...ctx, checked: false }),
-		setHovered: (ctx) => ({ ...ctx, hovered: true }),
-		clearHovered: (ctx) => ({ ...ctx, hovered: false }),
-		setFocused: (ctx) => ({ ...ctx, focused: true }),
-		clearFocused: (ctx) => ({ ...ctx, focused: false }),
+	implementations: {
+		guards: {
+			canInteract: ({ prop }: any) => !Boolean(prop("disabled")),
+		},
+		actions: {
+			toggleChecked: ({ context }: any) =>
+				context.set("checked", !Boolean(context.get("checked"))),
+			emitChange: ({ context, prop }: any) => {
+				const onChange = prop("onChange");
+				if (typeof onChange === "function") onChange(Boolean(context.get("checked")));
+			},
+			setHovered: ({ context }: any) => context.set("hovered", true),
+			clearHovered: ({ context }: any) => context.set("hovered", false),
+			setFocused: ({ context }: any) => context.set("focused", true),
+			clearFocused: ({ context }: any) => context.set("focused", false),
+		},
 	},
-});
+} as any);

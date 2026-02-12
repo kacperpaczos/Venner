@@ -2,7 +2,7 @@ import { createMachine } from "@zag-js/core";
 
 export interface ButtonProps {
 	disabled?: boolean;
-	variant?: "primary" | "secondary" | "ghost" | "link";
+	variant?: "default" | "suggested" | "destructive" | "secondary" | "ghost" | "link";
 	size?: "sm" | "md" | "lg";
 	onClick?: () => void;
 }
@@ -13,7 +13,7 @@ export const buttonMachine = createMachine({
 	props({ props }: any) {
 		return {
 			disabled: false,
-			variant: "primary",
+			variant: "default",
 			size: "md",
 			onClick: undefined,
 			...props,
