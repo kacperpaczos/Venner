@@ -49,6 +49,7 @@ run_app() {
       --socket=session-bus \
       --socket=wayland \
       --socket=fallback-x11 \
+      --device=dri \
       --command=gjs \
       "$FLATPAK_RUNTIME" -m "$app_path" &
   else
