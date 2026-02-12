@@ -98,6 +98,26 @@
 	opacity: 0.85;
 }
 
+.ssot-buttons {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.ssot-json {
+	min-height: 180px;
+	width: 100%;
+	border: 1px solid var(--venner-border);
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--venner-bg) 90%, #000 10%);
+	color: var(--venner-fg);
+	padding: 10px;
+	font-family: ui-monospace, monospace;
+	font-size: 12px;
+	line-height: 1.4;
+	box-sizing: border-box;
+}
+
 @media (max-width: 900px) {
 	.gtk4-reference-page {
 		padding: 12px;

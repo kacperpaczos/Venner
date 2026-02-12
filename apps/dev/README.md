@@ -82,6 +82,20 @@ Expected result:
 - diagnostics update via `theme:diagnostics`
 - terminal shows `[theme] ...` lines with source/path/tokens
 
+## SSoT Import / Export
+
+`apps/dev` includes a panel `SSoT Import/Export` that supports:
+- `Export snapshot` (JSON with `schemaVersion`, `exportedAt`, `appVersion`, `state`)
+- `Validate file` (non-mutating validation + migration report)
+- `Import snapshot` (hard replace + rehydrate flow)
+
+Rehydrate emits:
+- `rehydrate:started`
+- `state:changed`
+- `rehydrate:completed`
+
+After import, app tries to restore route/session scale, tab selection, scroll position and focus (best effort).
+
 ## Recommended IDE setup
 
 - [VS Code](https://code.visualstudio.com/)

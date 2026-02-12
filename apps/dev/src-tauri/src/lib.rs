@@ -1,15 +1,34 @@
 use std::collections::HashMap;
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
-use venner_core::app_state::{AppState, ThemeTokens};
+use venner_core::app_state::{
+    AppState, ScrollState, SessionState, ThemeTokens, UiState, ViewportState, WindowState,
+};
 use venner_core::theme_monitor;
 use venner_core::VennerStore;
 
 fn default_app_state() -> AppState {
     AppState {
         version: 1,
-        windows: HashMap::new(),
+        schema_version: venner_core::state::CURRENT_SCHEMA_VERSION,
+        session: SessionState::default(),
+        windows: HashMap::from([(
+            "main".to_string(),
+            WindowState {
+                id: "main".to_string(),
+                x: 0,
+                y: 0,
+                width: 960,
+                height: 700,
+                maximized: false,
+                focused: true,
+                route: "/".to_string(),
+                scroll: ScrollState::default(),
+                viewport: ViewportState::default(),
+            },
+        )]),
         widgets: HashMap::new(),
+        ui: UiState::default(),
         theme: ThemeTokens {
             bg: "#353535".to_string(),
             fg: "#eeeeec".to_string(),
@@ -49,6 +68,10 @@ pub fn run() {
             venner_core::commands::dispatch,
             venner_core::commands::get_state,
             venner_core::commands::inject_state,
+            venner_core::commands::get_schema_version,
+            venner_core::commands::export_state,
+            venner_core::commands::import_state,
+            venner_core::commands::validate_state,
             venner_core::commands::get_gtk_theme,
             venner_core::commands::get_gtk_theme_diagnostics,
             log_to_terminal,
