@@ -1,26 +1,27 @@
 {
-  "name": "venner-monorepo",
-  "private": true,
-  "type": "module",
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "packages/themes/*",
-    "packages/adapters/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "test": "bun test",
-    "typecheck": "turbo run typecheck",
-    "codegen": "cargo test --workspace --test specta_export"
-  },
-  "devDependencies": {
-    "turbo": "^2.4.0",
-    "prettier": "^3.5.0",
-    "typescript": "^5.7.0",
-    "@biomejs/biome": "latest"
-  },
-  "packageManager": "bun@1.3.8"
+	"name": "venner-monorepo",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"apps/*",
+		"packages/*",
+		"packages/themes/*",
+		"packages/adapters/*"
+	],
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"dev:app": "cd apps/dev && bunx tauri dev",
+		"lint": "turbo run lint",
+		"test": "bun test",
+		"typecheck": "turbo run typecheck",
+		"codegen": "cargo test --workspace --test specta_export"
+	},
+	"devDependencies": {
+		"turbo": "^2.4.0",
+		"prettier": "^3.5.0",
+		"typescript": "^5.7.0",
+		"@biomejs/biome": "latest"
+	},
+	"packageManager": "bun@1.3.8"
 }

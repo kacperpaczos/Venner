@@ -12,11 +12,19 @@ edition = "2024"
 license = "GPL-3.0"
 
 [workspace.dependencies]
-# Core dependencies shared across crates
+# Core dependencies - stabilne standardy na rok 2026
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tauri = { version = "2.0.0", features = [] }
-tauri-build = { version = "2.0.0", features = [] }
-specta = { version = "2.0.0", features = ["tauri", "typescript"] }
-tokio = { version = "1.0", features = ["full"] }
-thiserror = "1.0"
+
+# Tauri 2.10.2 - Twoja obecna wersja (dojrzały ekosystem)
+tauri = { version = "2.10.2", features = [] }
+tauri-build = { version = "2.5.5", features = [] }
+tauri-plugin-log = "2"
+
+# Specta v2 RC - do stabilnego 2.0
+specta = { version = "2.0.0-rc.22", features = ["derive", "serde_json"] }
+specta-typescript = "0.0.9"
+
+# Async & Error handling - zaktualizowane do najnowszych stabilnych wydań
+tokio = { version = "1.40", features = ["full"] }
+thiserror = "2.0" # Standard dla projektów Rust 2024+
