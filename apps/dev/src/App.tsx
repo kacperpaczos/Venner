@@ -1,5 +1,6 @@
 import { Button } from "@venner/solid";
 import { injectGnomeTheme } from "@venner/themes-gnome";
+import { termLog } from "./logger";
 import "@venner/ui/styles/tokens.css";
 import "./App.css";
 
@@ -11,7 +12,7 @@ function App() {
 			<h1>Venner Dev</h1>
 			<p>Przycisk w stylu GNOME (motyw z systemu).</p>
 			<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-				<Button onClick={() => console.log("clicked!")}>Click me</Button>
+				<Button onClick={() => termLog.info("Button clicked")}>Click me</Button>
 				<Button variant="secondary">Secondary</Button>
 				<Button disabled>Disabled</Button>
 			</div>
