@@ -6,10 +6,13 @@ function section(title) {
 }
 
 export function buildTabsScene() {
-	const group = section("Tabs via ViewSwitcher (Libadwaita)");
-	const row = new Adw.ActionRow({ title: "View stack tabs" });
+	const box = new Gtk.Box({
+		orientation: Gtk.Orientation.VERTICAL,
+		spacing: 8,
+		hexpand: true,
+	});
 
-	const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 8, hexpand: true });
+	const group = section("Tabs via ViewSwitcher (Libadwaita)");
 	const stack = new Adw.ViewStack({ hexpand: true, vexpand: true });
 
 	const general = new Gtk.Label({ label: "General content" });
@@ -25,10 +28,9 @@ export function buildTabsScene() {
 		policy: Adw.ViewSwitcherPolicy.WIDE,
 	});
 
+	box.append(group);
 	box.append(switcher);
 	box.append(stack);
-	row.add_suffix(box);
-	row.set_activatable(false);
-	group.add(row);
-	return group;
+
+	return box;
 }
