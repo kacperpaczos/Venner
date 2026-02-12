@@ -64,7 +64,7 @@ pub fn eval_alpha(color: &str, alpha: f64) -> Option<String> {
 fn resolve_value(value: &str) -> String {
     let value = value.trim();
     let shade_re = Regex::new(r"shade\s*\(\s*([^,)]+)\s*,\s*([\d.]+)\s*\)").unwrap();
-    let alpha_re = Regex::new(r"alpha\s*\(\s*(\w+)\s*,\s*([\d.]+)\s*\)").unwrap();
+    let alpha_re = Regex::new(r"alpha\s*\(\s*([^,)]+)\s*,\s*([\d.]+)\s*\)").unwrap();
 
     if let Some(cap) = shade_re.captures(value) {
         let color = cap[1].trim().trim_start_matches('#');
@@ -171,6 +171,14 @@ mod tests {
         assert_eq!(
             eval_alpha("black", 0.35).as_deref(),
             Some("rgba(0, 0, 0, 0.35)")
+        );
+    }
+
+    #[test]
+    fn resolve_alpha_with_hex_color() {
+        assert_eq!(
+            resolve_value("alpha(#353535, 0.5)"),
+            "rgba(53, 53, 53, 0.50)"
         );
     }
 
