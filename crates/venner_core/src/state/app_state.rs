@@ -127,7 +127,7 @@ pub struct WidgetState {
     #[serde(default)]
     pub transient: serde_json::Value,
     #[serde(default)]
-    pub updated_at: u64,
+    pub updated_at: u32,
     #[serde(default)]
     pub source: String,
 }
@@ -163,7 +163,7 @@ pub struct UiState {
     #[serde(default)]
     pub panels: HashMap<String, bool>,
     #[serde(default)]
-    pub last_updated_at: u64,
+    pub last_updated_at: u32,
 }
 
 impl Default for UiState {
@@ -202,7 +202,7 @@ impl Default for ThemeTokens {
 #[serde(rename_all = "camelCase")]
 pub struct PersistedAppState {
     pub schema_version: u32,
-    pub exported_at: u64,
+    pub exported_at: u32,
     pub app_version: String,
     pub state: AppState,
 }

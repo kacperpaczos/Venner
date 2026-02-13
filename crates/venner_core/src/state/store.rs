@@ -400,7 +400,7 @@ fn extract_state_value(
     errors: &mut Vec<String>,
 ) -> (Value, Option<u32>) {
     let source_schema;
-    let mut state_value;
+    let state_value;
 
     match input {
         Value::Object(mut root) => {
@@ -536,10 +536,10 @@ fn migrate_v1_to_v2(state_value: &mut Value, warnings: &mut Vec<String>) -> Resu
     Ok(())
 }
 
-fn now_unix() -> u64 {
+fn now_unix() -> u32 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
+        .map(|d| d.as_secs() as u32)
         .unwrap_or(0)
 }
 
@@ -653,5 +653,81 @@ mod tests {
         let snapshot = store.export_state_json("test").unwrap();
         let result = store.import_state_json(&snapshot);
         assert!(result.applied);
+    }
+
+    #[test]
+    fn reduce_handles_widget_state_patch_and_transient() {
+        let mut state = sample_state();
+        VennerStore::reduce(
+            &mut state,
+            &Action::WidgetRegister {
+                widget_id: "list-main".to_string(),
+                kind: "list-view".to_string(),
+                initial: Some(json!({"selectedId":"row-2","selectedIds":["row-2"]})),
+            },
+        );
+        VennerStore::reduce(
+            &mut state,
+            &Action::WidgetStatePatch {
+                widget_id: "list-main".to_string(),
+                patch: json!({"activeIndex": 3}),
+            },
+        );
+        VennerStore::reduce(
+            &mut state,
+            &Action::WidgetTransient {
+                widget_id: "list-main".to_string(),
+                transient: json!({"hovered": true}),
+            },
+        );
+
+        let widget = state.widgets.get("list-main").expect("widget list-main");
+        assert_eq!(widget.persistent["selectedId"], "row-2");
+        assert_eq!(widget.persistent["activeIndex"], 3);
+        assert_eq!(widget.transient["hovered"], true);
+    }
+
+    #[test]
+    fn export_import_roundtrip_keeps_new_widget_fields() {
+        let store = VennerStore::new(sample_state());
+        store.dispatch(Action::WidgetRegister {
+            widget_id: "paned-main".to_string(),
+            kind: "paned".to_string(),
+            initial: Some(json!({"split": 42, "min": 15, "max": 85})),
+        });
+        store.dispatch(Action::WidgetCommit {
+            widget_id: "paned-main".to_string(),
+            value: json!({"split": 38, "min": 15, "max": 85}),
+        });
+        store.dispatch(Action::WidgetTransient {
+            widget_id: "paned-main".to_string(),
+            transient: json!({"resizing": true}),
+        });
+
+        let snapshot = store.export_state_json("test").expect("snapshot");
+        let result = store.import_state_json(&snapshot);
+        assert!(result.applied);
+        let imported = store.get_state();
+        let widget = imported.widgets.get("paned-main").expect("paned-main widget");
+        assert_eq!(widget.persistent["split"], 38);
+        assert_eq!(widget.transient["resizing"], true);
+    }
+
+    #[test]
+    fn dispatch_reduces_and_persists_widget_selection_model() {
+        let store = VennerStore::new(sample_state());
+        store.dispatch(Action::WidgetRegister {
+            widget_id: "list-main".to_string(),
+            kind: "list-view".to_string(),
+            initial: Some(json!({"selectedId": "row-1", "selectedIds": ["row-1"], "activeIndex": 0})),
+        });
+        store.dispatch(Action::WidgetCommit {
+            widget_id: "list-main".to_string(),
+            value: json!({"selectedId":"row-3","selectedIds":["row-3"],"activeIndex":2}),
+        });
+        let state = store.get_state();
+        let widget = state.widgets.get("list-main").expect("list-main widget");
+        assert_eq!(widget.persistent["selectedId"], "row-3");
+        assert_eq!(widget.persistent["activeIndex"], 2);
     }
 }
