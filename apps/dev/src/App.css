@@ -118,6 +118,12 @@
 	box-sizing: border-box;
 }
 
+.gtk4-popover-content {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
 @media (max-width: 900px) {
 	.gtk4-reference-page {
 		padding: 12px;

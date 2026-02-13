@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::process::Command;
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
 use venner_core::app_state::{
@@ -6,6 +7,22 @@ use venner_core::app_state::{
 };
 use venner_core::theme_monitor;
 use venner_core::VennerStore;
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NativeDialogResult {
+    applied: bool,
+    cancelled: bool,
+    value: Option<String>,
+    error: Option<String>,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AboutDialogResult {
+    applied: bool,
+    error: Option<String>,
+}
 
 fn default_app_state() -> AppState {
     AppState {
@@ -51,6 +68,76 @@ fn log_to_terminal(level: String, message: String) {
     println!("{tag} [frontend] {message}");
 }
 
+#[cfg(target_os = "linux")]
+fn run_zenity(args: &[&str]) -> NativeDialogResult {
+    let output = Command::new("zenity").args(args).output();
+    match output {
+        Ok(result) => {
+            if result.status.success() {
+                let value = String::from_utf8_lossy(&result.stdout).trim().to_string();
+                NativeDialogResult {
+                    applied: true,
+                    cancelled: false,
+                    value: if value.is_empty() { None } else { Some(value) },
+                    error: None,
+                }
+            } else {
+                let stderr = String::from_utf8_lossy(&result.stderr).trim().to_string();
+                NativeDialogResult {
+                    applied: true,
+                    cancelled: true,
+                    value: None,
+                    error: if stderr.is_empty() { None } else { Some(stderr) },
+                }
+            }
+        }
+        Err(err) => NativeDialogResult {
+            applied: false,
+            cancelled: false,
+            value: None,
+            error: Some(format!("zenity_not_available:{err}")),
+        },
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn run_zenity(_args: &[&str]) -> NativeDialogResult {
+    NativeDialogResult {
+        applied: false,
+        cancelled: false,
+        value: None,
+        error: Some("unsupported_platform".to_string()),
+    }
+}
+
+#[tauri::command]
+fn open_file_dialog() -> NativeDialogResult {
+    run_zenity(&["--file-selection", "--title=Open File"])
+}
+
+#[tauri::command]
+fn open_color_dialog() -> NativeDialogResult {
+    run_zenity(&["--color-selection", "--show-palette", "--title=Select Color"])
+}
+
+#[tauri::command]
+fn open_font_dialog() -> NativeDialogResult {
+    run_zenity(&["--font-selection", "--title=Select Font"])
+}
+
+#[tauri::command]
+fn show_about_dialog() -> AboutDialogResult {
+    let result = run_zenity(&[
+        "--info",
+        "--title=About Venner",
+        "--text=Venner GTK4 Reference Dev App",
+    ]);
+    AboutDialogResult {
+        applied: result.applied,
+        error: result.error,
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -74,6 +161,10 @@ pub fn run() {
             venner_core::commands::validate_state,
             venner_core::commands::get_gtk_theme,
             venner_core::commands::get_gtk_theme_diagnostics,
+            open_file_dialog,
+            open_color_dialog,
+            open_font_dialog,
+            show_about_dialog,
             log_to_terminal,
         ])
         .setup(|app| {

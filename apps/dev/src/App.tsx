@@ -1,5 +1,44 @@
-import { events, store as ssoStore, type AppState, type ImportResult, type ValidationReport } from "@venner/core";
-import { Button, Switch, Tabs } from "@venner/solid";
+import {
+	events,
+	store as ssoStore,
+	type AboutDialogResult,
+	type AppState,
+	type ImportResult,
+	type NativeDialogResult,
+	type ValidationReport,
+} from "@venner/core";
+import {
+	ActionBar,
+	Button,
+	CenterBox,
+	CheckButton,
+	ColumnView,
+	DrawingArea,
+	DropDown,
+	Expander,
+	FlowBox,
+	GridView,
+	HeaderBar,
+	LevelBar,
+	LinkButton,
+	ListBox,
+	ListView,
+	MenuButton,
+	Paned,
+	PasswordEntry,
+	Popover,
+	ProgressBar,
+	Scale,
+	SearchEntry,
+	Spinner,
+	SpinButton,
+	Switch,
+	SplitButton,
+	Tabs,
+	TextView,
+	ToggleButton,
+	VideoView,
+} from "@venner/solid";
 import {
 	getThemeDiagnostics,
 	getThemeTokens,
@@ -23,6 +62,25 @@ const WIDGET_IDS = {
 	switchOn: "switch-on",
 	switchDisabled: "switch-disabled",
 	tabsMain: "tabs-main",
+	toggleMain: "toggle-main",
+	checkMain: "check-main",
+	spinMain: "spin-main",
+	scaleMain: "scale-main",
+	listMain: "list-main",
+	menuMain: "menu-main",
+	searchMain: "search-main",
+	passwordMain: "password-main",
+	progressMain: "progress-main",
+	levelMain: "level-main",
+	popoverMain: "popover-main",
+	expanderMain: "expander-main",
+	panedMain: "paned-main",
+	listBoxMain: "listbox-main",
+	dropdownMain: "dropdown-main",
+	splitButtonMain: "split-button-main",
+	textViewMain: "text-view-main",
+	gridViewMain: "grid-view-main",
+	columnViewMain: "column-view-main",
 };
 
 function App() {
@@ -38,6 +96,23 @@ function App() {
 	const [switchOff, setSwitchOff] = createSignal(false);
 	const [switchOn, setSwitchOn] = createSignal(true);
 	const [switchDisabled, setSwitchDisabled] = createSignal(true);
+	const [togglePressed, setTogglePressed] = createSignal(false);
+	const [checkEnabled, setCheckEnabled] = createSignal(true);
+	const [searchValue, setSearchValue] = createSignal("");
+	const [passwordValue, setPasswordValue] = createSignal("secret");
+	const [spinValue, setSpinValue] = createSignal(12);
+	const [progressValue, setProgressValue] = createSignal(62);
+	const [scaleValue, setScaleValue] = createSignal(45);
+	const [levelValue, setLevelValue] = createSignal(68);
+	const [menuOpen, setMenuOpen] = createSignal(false);
+	const [popoverOpen, setPopoverOpen] = createSignal(false);
+	const [expanderOpen, setExpanderOpen] = createSignal(true);
+	const [panedSplit, setPanedSplit] = createSignal(42);
+	const [selectedListId, setSelectedListId] = createSignal<string | null>("row-2");
+	const [dialogResult, setDialogResult] = createSignal<NativeDialogResult | AboutDialogResult | null>(null);
+	const [listBoxActive, setListBoxActive] = createSignal("lb-1");
+	const [dropdownValue, setDropdownValue] = createSignal("appearance");
+	const [textViewValue, setTextViewValue] = createSignal("Multi-line text sample");
 
 	const [activeTab, setActiveTab] = createSignal("general");
 	const [tabsRenderKey, setTabsRenderKey] = createSignal(0);
@@ -70,6 +145,8 @@ function App() {
 	};
 
 	const dispatch = (action: unknown) => ssoStore.dispatch(action);
+	const transient = (widgetId: string, patch: Record<string, unknown>) =>
+		dispatch({ type: "WidgetTransient", widget_id: widgetId, transient: patch });
 
 	const registerWidgets = () => {
 		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.entryEmpty, kind: "entry", initial: { value: "" } });
@@ -79,6 +156,25 @@ function App() {
 		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.switchOn, kind: "switch", initial: { checked: true } });
 		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.switchDisabled, kind: "switch", initial: { checked: true } });
 		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.tabsMain, kind: "tabs", initial: { activeTab: "general" } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.toggleMain, kind: "toggle-button", initial: { pressed: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.checkMain, kind: "check-button", initial: { checked: true } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.spinMain, kind: "spin-button", initial: { value: 12 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.scaleMain, kind: "scale", initial: { value: 45 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.listMain, kind: "list-view", initial: { selectedId: "row-2", activeIndex: 1 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.menuMain, kind: "menu-button", initial: { open: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.searchMain, kind: "search-entry", initial: { value: "" } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.passwordMain, kind: "password-entry", initial: { value: "secret", revealed: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.progressMain, kind: "progress-bar", initial: { value: 62, max: 100 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.levelMain, kind: "level-bar", initial: { value: 68, min: 0, max: 100 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.popoverMain, kind: "popover", initial: { open: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.expanderMain, kind: "expander", initial: { expanded: true } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.panedMain, kind: "paned", initial: { split: 42, min: 15, max: 85 } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.listBoxMain, kind: "list-box", initial: { activeId: "lb-1" } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.dropdownMain, kind: "dropdown", initial: { value: "appearance", open: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.splitButtonMain, kind: "split-button", initial: { menuOpen: false } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.textViewMain, kind: "text-view", initial: { value: "Multi-line text sample" } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.gridViewMain, kind: "grid-view", initial: { selectedId: "grid-1" } });
+		dispatch({ type: "WidgetRegister", widget_id: WIDGET_IDS.columnViewMain, kind: "column-view", initial: { sortBy: "name" } });
 		dispatch({ type: "WidgetDisable", widget_id: WIDGET_IDS.entryDisabled, disabled: true });
 		dispatch({ type: "WidgetDisable", widget_id: WIDGET_IDS.switchDisabled, disabled: true });
 	};
@@ -93,6 +189,22 @@ function App() {
 		setSwitchOff(Boolean(getPersistent(WIDGET_IDS.switchOff)?.checked ?? false));
 		setSwitchOn(Boolean(getPersistent(WIDGET_IDS.switchOn)?.checked ?? true));
 		setSwitchDisabled(Boolean(getPersistent(WIDGET_IDS.switchDisabled)?.checked ?? true));
+		setTogglePressed(Boolean(getPersistent(WIDGET_IDS.toggleMain)?.pressed ?? false));
+		setCheckEnabled(Boolean(getPersistent(WIDGET_IDS.checkMain)?.checked ?? true));
+		setSpinValue(Number(getPersistent(WIDGET_IDS.spinMain)?.value ?? 12));
+		setScaleValue(Number(getPersistent(WIDGET_IDS.scaleMain)?.value ?? 45));
+		setSelectedListId(String(getPersistent(WIDGET_IDS.listMain)?.selectedId ?? "row-2"));
+		setMenuOpen(Boolean(getPersistent(WIDGET_IDS.menuMain)?.open ?? false));
+		setSearchValue(String(getPersistent(WIDGET_IDS.searchMain)?.value ?? ""));
+		setPasswordValue(String(getPersistent(WIDGET_IDS.passwordMain)?.value ?? "secret"));
+		setProgressValue(Number(getPersistent(WIDGET_IDS.progressMain)?.value ?? 62));
+		setLevelValue(Number(getPersistent(WIDGET_IDS.levelMain)?.value ?? 68));
+		setPopoverOpen(Boolean(getPersistent(WIDGET_IDS.popoverMain)?.open ?? false));
+		setExpanderOpen(Boolean(getPersistent(WIDGET_IDS.expanderMain)?.expanded ?? true));
+		setPanedSplit(Number(getPersistent(WIDGET_IDS.panedMain)?.split ?? 42));
+		setListBoxActive(String(getPersistent(WIDGET_IDS.listBoxMain)?.activeId ?? "lb-1"));
+		setDropdownValue(String(getPersistent(WIDGET_IDS.dropdownMain)?.value ?? "appearance"));
+		setTextViewValue(String(getPersistent(WIDGET_IDS.textViewMain)?.value ?? "Multi-line text sample"));
 
 		const tab = state.ui.tabs[WIDGET_IDS.tabsMain] ?? String(getPersistent(WIDGET_IDS.tabsMain)?.activeTab ?? "general");
 		setActiveTab(tab);
@@ -170,6 +282,22 @@ function App() {
 		setImportResult(result);
 	};
 
+	const openFileDialog = async () => {
+		setDialogResult(await ssoStore.openFileDialog());
+	};
+
+	const openColorDialog = async () => {
+		setDialogResult(await ssoStore.openColorDialog());
+	};
+
+	const openFontDialog = async () => {
+		setDialogResult(await ssoStore.openFontDialog());
+	};
+
+	const showAboutDialog = async () => {
+		setDialogResult(await ssoStore.showAboutDialog());
+	};
+
 	onMount(async () => {
 		await injectGnomeTheme();
 		await refreshThemeDiagnostics();
@@ -213,6 +341,13 @@ function App() {
 			unlistenRehydrateDone();
 		});
 	});
+
+	const listItems = [
+		{ id: "row-1", label: "General", description: "Workspace and window options" },
+		{ id: "row-2", label: "Appearance", description: "Theme, tokens and metrics" },
+		{ id: "row-3", label: "Shortcuts", description: "Keyboard and action mapping" },
+		{ id: "row-4", label: "Advanced", description: "Debugging and diagnostics" },
+	];
 
 	return (
 		<main class="gtk4-reference-page">
@@ -304,6 +439,267 @@ function App() {
 						]}
 					/>
 				</div>
+			</section>
+
+			<section class="gtk4-frame">
+				<h2 class="gtk4-label">Controls + Input (Breadth-First)</h2>
+				<div class="gtk4-row">
+					<ToggleButton
+						pressed={togglePressed()}
+						onPressedChange={(pressed) => {
+							setTogglePressed(pressed);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.toggleMain, value: { pressed } });
+							transient(WIDGET_IDS.toggleMain, { pressed });
+						}}
+					>
+						Toggle Button
+					</ToggleButton>
+					<CheckButton
+						checked={checkEnabled()}
+						label="Check Button"
+						onChange={(checked) => {
+							setCheckEnabled(checked);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.checkMain, value: { checked } });
+							transient(WIDGET_IDS.checkMain, { checked });
+						}}
+					/>
+					<LinkButton
+						href="https://docs.gtk.org/gtk4/"
+						onClick={() => transient("link-docs", { clicked: true })}
+					>
+						GTK4 Docs
+					</LinkButton>
+					<MenuButton
+						label="Menu Button"
+						open={menuOpen()}
+						onOpenChange={(open) => {
+							setMenuOpen(open);
+							dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.menuMain, patch: { open } });
+							transient(WIDGET_IDS.menuMain, { open });
+						}}
+					>
+						<button type="button" class="venner-button" data-variant="default" onClick={() => setMenuOpen(false)}>First item</button>
+						<button type="button" class="venner-button" data-variant="default" onClick={() => setMenuOpen(false)}>Second item</button>
+					</MenuButton>
+				</div>
+
+				<div class="gtk4-row">
+					<SearchEntry
+						value={searchValue()}
+						placeholder="Search entry"
+						onInput={(value) => {
+							setSearchValue(value);
+							dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.searchMain, patch: { value } });
+							transient(WIDGET_IDS.searchMain, { dirty: true });
+						}}
+					/>
+					<PasswordEntry
+						value={passwordValue()}
+						onInput={(value) => {
+							setPasswordValue(value);
+							dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.passwordMain, patch: { value } });
+							transient(WIDGET_IDS.passwordMain, { dirty: true });
+						}}
+					/>
+					<SpinButton
+						value={spinValue()}
+						min={0}
+						max={99}
+						step={1}
+						onChange={(value) => {
+							setSpinValue(value);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.spinMain, value: { value } });
+							transient(WIDGET_IDS.spinMain, { active: true });
+						}}
+					/>
+				</div>
+			</section>
+
+			<section class="gtk4-frame">
+				<h2 class="gtk4-label">Indicators + Layout</h2>
+				<div class="gtk4-row">
+					<ProgressBar value={progressValue()} />
+					<Spinner active />
+					<Scale
+						value={scaleValue()}
+						onChange={(value) => {
+							setScaleValue(value);
+							setProgressValue(value);
+							setLevelValue(value);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.scaleMain, value: { value } });
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.progressMain, value: { value, max: 100 } });
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.levelMain, value: { value, min: 0, max: 100 } });
+							transient(WIDGET_IDS.scaleMain, { dragging: true });
+						}}
+					/>
+					<LevelBar value={levelValue()} />
+				</div>
+				<div class="gtk4-row">
+					<Popover
+						label="Popover"
+						open={popoverOpen()}
+						onOpenChange={(open) => {
+							setPopoverOpen(open);
+							dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.popoverMain, patch: { open } });
+							transient(WIDGET_IDS.popoverMain, { open });
+						}}
+						content={
+							<div class="gtk4-popover-content">
+								<div>GTK4-style transient panel</div>
+								<Button variant="suggested" onClick={() => setPopoverOpen(false)}>Close</Button>
+							</div>
+						}
+					/>
+					<Expander
+						title="Expander"
+						expanded={expanderOpen()}
+						onExpandedChange={(expanded) => {
+							setExpanderOpen(expanded);
+							dispatch({ type: "UiPanelUpdate", id: WIDGET_IDS.expanderMain, collapsed: !expanded });
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.expanderMain, value: { expanded } });
+							transient(WIDGET_IDS.expanderMain, { expanded });
+						}}
+					>
+						Expanded content for parity checks
+					</Expander>
+				</div>
+				<Paned
+					split={panedSplit()}
+					onSplitChange={(split) => {
+						setPanedSplit(split);
+						dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.panedMain, patch: { split } });
+						transient(WIDGET_IDS.panedMain, { resizing: true });
+					}}
+					start={<div>Start pane</div>}
+					end={<div>End pane</div>}
+				/>
+			</section>
+
+			<section class="gtk4-frame">
+				<h2 class="gtk4-label">ListView (Model-View Filar)</h2>
+				<ListView
+					items={listItems}
+					selectedId={selectedListId()}
+					onSelect={(id) => {
+						setSelectedListId(id);
+						dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.listMain, value: { selectedId: id, selectedIds: [id] } });
+						transient(WIDGET_IDS.listMain, { activeIndex: listItems.findIndex((item) => item.id === id) });
+					}}
+				/>
+			</section>
+
+			<section class="gtk4-frame">
+				<h2 class="gtk4-label">Stage 2 Widgets</h2>
+				<HeaderBar
+					title="HeaderBar"
+					start={<Button variant="default">Back</Button>}
+					end={<SplitButton label="Run" onPrimary={() => transient(WIDGET_IDS.splitButtonMain, { primary: true })} onMenu={() => transient(WIDGET_IDS.splitButtonMain, { menu: true })} />}
+				/>
+				<CenterBox
+					start={<span>Start</span>}
+					center={<span>CenterBox</span>}
+					end={<span>End</span>}
+				/>
+				<div class="gtk4-row">
+					<DropDown
+						items={[
+							{ id: "general", label: "General" },
+							{ id: "appearance", label: "Appearance" },
+							{ id: "advanced", label: "Advanced" },
+						]}
+						value={dropdownValue()}
+						onChange={(value) => {
+							setDropdownValue(value);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.dropdownMain, value: { value, open: false } });
+						}}
+					/>
+					<ListBox
+						items={[
+							{ id: "lb-1", label: "Flow item 1" },
+							{ id: "lb-2", label: "Flow item 2" },
+							{ id: "lb-3", label: "Flow item 3" },
+						]}
+						activeId={listBoxActive()}
+						onChange={(id) => {
+							setListBoxActive(id);
+							dispatch({ type: "WidgetCommit", widget_id: WIDGET_IDS.listBoxMain, value: { activeId: id } });
+						}}
+					/>
+				</div>
+				<FlowBox
+					items={[
+						<Button variant="default">Item A</Button>,
+						<Button variant="default">Item B</Button>,
+						<Button variant="default">Item C</Button>,
+					]}
+				/>
+				<ActionBar>
+					<Button variant="default">Cancel</Button>
+					<Button variant="suggested">Apply</Button>
+				</ActionBar>
+			</section>
+
+			<section class="gtk4-frame">
+				<h2 class="gtk4-label">Stage 3 Widgets</h2>
+				<div class="gtk4-row">
+					<TextView
+						value={textViewValue()}
+						onInput={(value) => {
+							setTextViewValue(value);
+							dispatch({ type: "WidgetStatePatch", widget_id: WIDGET_IDS.textViewMain, patch: { value } });
+						}}
+					/>
+					<DrawingArea />
+				</div>
+				<GridView
+					items={[
+						{ id: "grid-1", label: "Card 1" },
+						{ id: "grid-2", label: "Card 2" },
+						{ id: "grid-3", label: "Card 3" },
+						{ id: "grid-4", label: "Card 4" },
+					]}
+				/>
+				<ColumnView
+					columns={["name", "value", "state"]}
+					rows={[
+						{ name: "alpha", value: "12", state: "ok" },
+						{ name: "beta", value: "8", state: "warn" },
+						{ name: "gamma", value: "17", state: "ok" },
+					]}
+				/>
+				<VideoView src="" />
+			</section>
+
+			<section class="gtk4-frame diagnostics-frame">
+				<div class="diagnostics-header">
+					<h2 class="gtk4-label">Native Dialog Wrappers</h2>
+					<div class="ssot-buttons">
+						<button type="button" class="diagnostics-refresh" onClick={openFileDialog}>Open File</button>
+						<button type="button" class="diagnostics-refresh" onClick={openColorDialog}>Open Color</button>
+						<button type="button" class="diagnostics-refresh" onClick={openFontDialog}>Open Font</button>
+						<button type="button" class="diagnostics-refresh" onClick={showAboutDialog}>About</button>
+					</div>
+				</div>
+				<Show when={dialogResult()}>
+					{(result) => (
+						<div class="diagnostics-grid">
+							<div>applied: {String(result().applied)}</div>
+							<div>
+								cancelled:{" "}
+								{"cancelled" in result()
+									? String((result() as NativeDialogResult).cancelled)
+									: "n/a"}
+							</div>
+							<div>
+								value:{" "}
+								{"value" in result()
+									? String((result() as NativeDialogResult).value ?? "none")
+									: "n/a"}
+							</div>
+							<div>error: {result().error ?? "none"}</div>
+						</div>
+					)}
+				</Show>
 			</section>
 
 			<section class="gtk4-frame diagnostics-frame">
