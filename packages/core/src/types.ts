@@ -96,6 +96,18 @@ export interface ImportResult {
 	errors: string[];
 }
 
+export interface NativeDialogResult {
+	applied: boolean;
+	cancelled: boolean;
+	value: string | null;
+	error: string | null;
+}
+
+export interface AboutDialogResult {
+	applied: boolean;
+	error: string | null;
+}
+
 export type ThemeSource = "system" | "project" | "default";
 
 export interface ThemeDiagnostics {

@@ -1,6 +1,12 @@
 import { invoke, store as coreStoreApi } from "./api/invoke";
 import { listen } from "./api/listen";
-import type { AppState, ImportResult, ValidationReport } from "./types";
+import type {
+	AboutDialogResult,
+	AppState,
+	ImportResult,
+	NativeDialogResult,
+	ValidationReport,
+} from "./types";
 
 /**
  * VennerStore - JavaScript projection of Rust store
@@ -50,6 +56,22 @@ class VennerStore {
 
 	importSnapshot(json: string): Promise<ImportResult> {
 		return coreStoreApi.importState(json);
+	}
+
+	openFileDialog(): Promise<NativeDialogResult> {
+		return coreStoreApi.openFileDialog();
+	}
+
+	openColorDialog(): Promise<NativeDialogResult> {
+		return coreStoreApi.openColorDialog();
+	}
+
+	openFontDialog(): Promise<NativeDialogResult> {
+		return coreStoreApi.openFontDialog();
+	}
+
+	showAboutDialog(): Promise<AboutDialogResult> {
+		return coreStoreApi.showAboutDialog();
 	}
 
 	private notify() {
