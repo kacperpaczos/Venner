@@ -1,0 +1,2 @@
+.venner-flow-box { display: flex; flex-wrap: wrap; gap: 8px; }
+.venner-flow-item { padding: 8px; border: 1px solid var(--venner-border); border-radius: 6px; }

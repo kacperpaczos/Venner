@@ -1,0 +1,17 @@
+.venner-check-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font: inherit;
+	color: var(--venner-fg);
+}
+
+.venner-check-button input {
+	width: 16px;
+	height: 16px;
+	accent-color: var(--venner-accent);
+}
+
+.venner-check-button[data-disabled="true"] {
+	opacity: 0.6;
+}

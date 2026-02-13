@@ -1,0 +1,5 @@
+.venner-column-view { width: 100%; border-collapse: collapse; border: 1px solid var(--venner-border); }
+.venner-column-view th, .venner-column-view td { border-bottom: 1px solid var(--venner-border); padding: 6px 8px; text-align: left; }
+.venner-column-view th { background: color-mix(in srgb, var(--venner-bg) 90%, #000 10%); }
+.venner-column-sort { all: unset; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; width: 100%; }
+.venner-column-sort[data-sorted=\"true\"]::after { content: attr(data-sort-dir); font-size: 10px; opacity: 0.75; text-transform: uppercase; }

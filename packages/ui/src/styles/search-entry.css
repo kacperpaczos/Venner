@@ -1,0 +1,11 @@
+.venner-search-entry {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--venner-fg);
+}
+
+.venner-search-entry > span {
+	font-size: 12px;
+	opacity: 0.8;
+}

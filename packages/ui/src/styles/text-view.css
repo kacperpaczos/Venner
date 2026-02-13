@@ -1,0 +1,1 @@
+.venner-text-view { width: min(480px, 100%); min-height: 120px; border: 1px solid var(--venner-border); border-radius: 8px; background: var(--venner-bg); color: var(--venner-fg); padding: 8px; font: inherit; }

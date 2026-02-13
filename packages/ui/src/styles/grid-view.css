@@ -1,0 +1,2 @@
+.venner-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.venner-grid-card { border: 1px solid var(--venner-border); border-radius: 8px; padding: 10px; min-height: 56px; display: grid; place-items: center; }

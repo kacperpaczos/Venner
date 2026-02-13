@@ -1,0 +1,3 @@
+.venner-split-button { display: inline-grid; grid-template-columns: auto 36px; border: 1px solid var(--venner-border); border-radius: 6px; overflow: hidden; }
+.venner-split-button button { border: 0; min-height: 34px; padding: 0 10px; background: var(--venner-btn-bg); color: var(--venner-btn-fg); }
+.venner-split-menu { border-left: 1px solid var(--venner-border); }

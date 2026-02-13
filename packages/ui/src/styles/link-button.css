@@ -1,0 +1,19 @@
+.venner-link-button {
+	display: inline-flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: 6px;
+	color: var(--venner-accent);
+	text-decoration: none;
+	border: 1px solid color-mix(in srgb, var(--venner-accent) 50%, transparent);
+	background: color-mix(in srgb, var(--venner-accent) 12%, transparent);
+}
+
+.venner-link-button:hover {
+	text-decoration: underline;
+}
+
+.venner-link-button[data-disabled="true"] {
+	pointer-events: none;
+	opacity: 0.5;
+}

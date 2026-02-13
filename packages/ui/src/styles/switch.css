@@ -30,6 +30,7 @@
 	border-radius: 50%;
 	background: var(--venner-switch-thumb-bg, #d9d9d9);
 	transition: background 140ms ease;
+	flex: 0 0 auto;
 }
 
 .venner-switch[data-checked="true"] .venner-switch-thumb {

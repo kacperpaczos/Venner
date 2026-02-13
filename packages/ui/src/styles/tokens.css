@@ -16,8 +16,8 @@
 	--venner-btn-accent: var(--venner-accent);
 	--venner-btn-border: var(--venner-border);
 	--venner-btn-radius: 6px;
-	--venner-btn-padding: 6px 12px;
-	--venner-btn-min-height: 36px;
+	--venner-btn-padding: 5px 12px;
+	--venner-btn-min-height: 32px;
 	--venner-btn-shadow: none;
 
 	/* Entry tokens */
@@ -25,13 +25,13 @@
 	--venner-entry-fg: var(--venner-fg);
 	--venner-entry-border: var(--venner-border);
 	--venner-entry-radius: 6px;
-	--venner-entry-padding: 6px 10px;
-	--venner-entry-min-height: 34px;
+	--venner-entry-padding: 5px 10px;
+	--venner-entry-min-height: 32px;
 
 	/* Switch tokens */
-	--venner-switch-width: 48px;
-	--venner-switch-height: 26px;
-	--venner-switch-thumb: 22px;
+	--venner-switch-width: 42px;
+	--venner-switch-height: 24px;
+	--venner-switch-thumb: 20px;
 	--venner-switch-bg: color-mix(in srgb, var(--venner-bg) 85%, #000 15%);
 	--venner-switch-bg-active: var(--venner-accent);
 	--venner-switch-border: var(--venner-border);

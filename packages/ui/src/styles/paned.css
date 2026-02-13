@@ -1,0 +1,25 @@
+.venner-paned {
+	display: grid;
+	align-items: stretch;
+	gap: 0;
+	width: 100%;
+	min-height: 160px;
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.venner-pane {
+	padding: 10px;
+	background: color-mix(in srgb, var(--venner-bg) 96%, #000 4%);
+}
+
+.venner-paned-handle {
+	appearance: none;
+	writing-mode: vertical-lr;
+	transform: rotate(180deg);
+	margin: 0;
+	background: color-mix(in srgb, var(--venner-bg) 80%, #000 20%);
+	border-left: 1px solid var(--venner-border);
+	border-right: 1px solid var(--venner-border);
+}
