@@ -1,57 +1,23 @@
 # GTK Reference Workspace
 
-This workspace defines the parity methodology between Venner components and native GNOME widget baselines.
+This directory provides GTK reference applications and one canonical implementation report.
 
-## Structure
+## Canonical Human Report
+- `tools/gtk-reference/gtk-implementation-report.md`
 
-- `gtk4-gjs/` - pure GTK4 reference app (GJS).
-- `libadwaita-gjs/` - Libadwaita reference app (GJS).
-- `parity-matrix.md` - status board per widget.
-- `workflow.md` - repeatable parity process and acceptance criteria.
-- `reports/` - per-widget delta reports and iteration notes.
+## Runtime Metadata (Machine-Readable)
+- `tools/gtk-reference/source-mapping.summary.json`
 
-## One-time prerequisites
+`source-mapping.summary.json` is consumed by `apps/dev` (`load_gtk_reference_summary`) and is not the human-facing report.
 
-- `gjs`
-- `gtk4`
-- `libadwaita-1`
+## Reference Apps (Unchanged)
+- `tools/gtk-reference/gtk4-gjs/`
+- `tools/gtk-reference/libadwaita-gjs/`
 
-Example (Debian/Ubuntu):
-
-```bash
-sudo apt-get update
-sudo apt-get install -y gjs gir1.2-gtk-4.0 gir1.2-adw-1
-```
-
-## Run reference apps
-
+## Run Reference Apps
 ```bash
 ./scripts/run-gtk-ref.sh
 ./scripts/run-gtk-ref.sh --gtk4
 ./scripts/run-gtk-ref.sh --libadwaita
+./scripts/run-gtk-ref.sh --both
 ```
-
-Or directly:
-
-```bash
-gjs -m tools/gtk-reference/gtk4-gjs/app.js
-gjs -m tools/gtk-reference/libadwaita-gjs/app.js
-```
-
-## Parity workflow (manual pixel-perfect review)
-
-1. Open GTK4 and Libadwaita reference scenes for one widget.
-2. Open equivalent Venner scene in `apps/dev`.
-3. Compare states:
-   - default, hover, active, focus-visible, disabled,
-   - selected/checked when relevant.
-4. Fill delta report in `reports/<widget>-parity.md`.
-5. Update `parity-matrix.md` status.
-
-## Quality checklist
-
-- Geometry: size, spacing, border width, radius.
-- Typography: font size, weight, line-height.
-- Colors and contrast.
-- Interaction behavior and focus ring.
-- API parity (props/state/events).
