@@ -1,0 +1,40 @@
+.venner-application-window {
+	border: 1px solid var(--venner-border, #c5c9d3);
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--venner-bg, #fff) 96%, #000 4%);
+	color: var(--venner-fg, #222);
+	overflow: hidden;
+}
+
+.venner-application-window-header {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--venner-border, #c5c9d3);
+}
+
+.venner-application-window-slot {
+	display: flex;
+	align-items: center;
+}
+
+.venner-application-window-slot.end {
+	justify-content: flex-end;
+}
+
+.venner-application-window-title-wrap {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	line-height: 1.25;
+}
+
+.venner-application-window-title-wrap small {
+	opacity: 0.75;
+}
+
+.venner-application-window-content {
+	padding: 12px;
+}

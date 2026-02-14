@@ -1,0 +1,39 @@
+.venner-overlay {
+	position: relative;
+	display: inline-block;
+}
+
+.venner-overlay-base {
+	position: relative;
+}
+
+.venner-overlay-layer {
+	position: absolute;
+	max-width: 80%;
+}
+
+.venner-overlay-layer.top-start {
+	top: 8px;
+	left: 8px;
+}
+
+.venner-overlay-layer.top-end {
+	top: 8px;
+	right: 8px;
+}
+
+.venner-overlay-layer.bottom-start {
+	bottom: 8px;
+	left: 8px;
+}
+
+.venner-overlay-layer.bottom-end {
+	bottom: 8px;
+	right: 8px;
+}
+
+.venner-overlay-layer.center {
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}

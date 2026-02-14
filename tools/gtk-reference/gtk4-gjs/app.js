@@ -4,7 +4,13 @@ import Gtk from "gi://Gtk?version=4.0";
 import Gio from "gi://Gio?version=2.0";
 
 import { buildButtonScene } from "./widgets/button.js";
+import { buildControlsScene } from "./widgets/controls.js";
 import { buildEntryScene } from "./widgets/entry.js";
+import { buildIndicatorsScene } from "./widgets/indicators.js";
+import { buildInputExtraScene } from "./widgets/input-extra.js";
+import { buildLayoutScene } from "./widgets/layout.js";
+import { buildListScene } from "./widgets/list.js";
+import { buildMediaScene } from "./widgets/media.js";
 import { buildSwitchScene } from "./widgets/switch.js";
 import { buildTabsScene } from "./widgets/tabs.js";
 
@@ -36,9 +42,15 @@ app.connect("activate", () => {
 	});
 
 	main.append(buildButtonScene());
+	main.append(buildControlsScene());
 	main.append(buildEntryScene());
+	main.append(buildInputExtraScene());
 	main.append(buildSwitchScene());
+	main.append(buildIndicatorsScene());
 	main.append(buildTabsScene());
+	main.append(buildLayoutScene());
+	main.append(buildListScene());
+	main.append(buildMediaScene());
 
 	const scroll = new Gtk.ScrolledWindow({ hexpand: true, vexpand: true });
 	scroll.set_child(main);

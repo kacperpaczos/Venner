@@ -1,0 +1,23 @@
+.venner-media-controls {
+	display: grid;
+	grid-template-columns: auto 1fr 120px;
+	align-items: center;
+	gap: 8px;
+	padding: 8px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--venner-bg, #fff) 95%, #000 5%);
+}
+
+.venner-media-play {
+	padding: 6px 10px;
+	border-radius: 7px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	background: var(--venner-btn-bg, transparent);
+	color: var(--venner-btn-fg, var(--venner-fg, #222));
+	cursor: pointer;
+}
+
+.venner-media-controls input[type="range"] {
+	width: 100%;
+}

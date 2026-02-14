@@ -5,7 +5,13 @@ import Gio from "gi://Gio?version=2.0";
 import Adw from "gi://Adw?version=1";
 
 import { buildButtonScene } from "./widgets/button.js";
+import { buildControlsScene } from "./widgets/controls.js";
 import { buildEntryScene } from "./widgets/entry.js";
+import { buildIndicatorsScene } from "./widgets/indicators.js";
+import { buildInputExtraScene } from "./widgets/input-extra.js";
+import { buildLayoutScene } from "./widgets/layout.js";
+import { buildListScene } from "./widgets/list.js";
+import { buildMediaScene } from "./widgets/media.js";
 import { buildSwitchScene } from "./widgets/switch.js";
 import { buildTabsScene } from "./widgets/tabs.js";
 
@@ -30,9 +36,15 @@ app.connect("activate", () => {
 	});
 
 	content.append(buildButtonScene());
+	content.append(buildControlsScene());
 	content.append(buildEntryScene());
+	content.append(buildInputExtraScene());
 	content.append(buildSwitchScene());
+	content.append(buildIndicatorsScene());
 	content.append(buildTabsScene());
+	content.append(buildLayoutScene());
+	content.append(buildListScene());
+	content.append(buildMediaScene());
 
 	const clamp = new Adw.Clamp({
 		maximum_size: 800,

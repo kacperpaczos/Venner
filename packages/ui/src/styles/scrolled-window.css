@@ -1,0 +1,7 @@
+.venner-scrolled-window {
+	overflow: auto;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	border-radius: 8px;
+	padding: 8px;
+	background: color-mix(in srgb, var(--venner-bg, #fff) 95%, #000 5%);
+}

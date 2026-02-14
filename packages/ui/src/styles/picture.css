@@ -1,0 +1,13 @@
+.venner-picture {
+	display: block;
+	max-width: 100%;
+}
+
+.venner-picture-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	background: color-mix(in srgb, var(--venner-bg, #fff) 92%, #000 8%);
+}
