@@ -1,0 +1,19 @@
+{
+  "tech": "venner",
+  "groups": [
+    {"id": "button", "label": "Button", "widgets": [{"id": "button.default", "label": "Button", "states": ["default", "hover", "active", "disabled"]}]},
+    {"id": "containers", "label": "Containers", "widgets": [{"id": "containers.main", "label": "ApplicationWindow/Box/Grid/StackSidebar", "states": ["default", "active"]}]},
+    {"id": "controls", "label": "Controls", "widgets": [{"id": "controls.main", "label": "Controls", "states": ["default", "active", "disabled"]}]},
+    {"id": "entry", "label": "Entry", "widgets": [{"id": "entry.text", "label": "Entry", "states": ["default", "focus", "disabled"]}]},
+    {"id": "input-extra", "label": "Input extras", "widgets": [{"id": "input.search", "label": "Search/Password/Spin", "states": ["default", "focus", "disabled"]}]},
+    {"id": "display", "label": "Display", "widgets": [{"id": "display.main", "label": "Label/Image/Picture", "states": ["default"]}]},
+    {"id": "switch", "label": "Switch", "widgets": [{"id": "switch.main", "label": "Switch", "states": ["off", "on", "disabled"]}]},
+    {"id": "indicators", "label": "Indicators", "widgets": [{"id": "indicators.main", "label": "Progress/Spinner/Scale/Level", "states": ["default", "active"]}]},
+    {"id": "tabs", "label": "Tabs", "widgets": [{"id": "tabs.main", "label": "Tabs", "states": ["default", "active"]}]},
+    {"id": "layout", "label": "Layout", "widgets": [{"id": "layout.main", "label": "Popover/Expander/Paned", "states": ["default", "active"]}]},
+    {"id": "list", "label": "List", "widgets": [{"id": "list.main", "label": "List", "states": ["default", "selected"]}]},
+    {"id": "media", "label": "Media", "widgets": [{"id": "media.main", "label": "Media", "states": ["default"]}]},
+    {"id": "media-controls", "label": "Media controls", "widgets": [{"id": "media-controls.main", "label": "MediaControls", "states": ["default", "active"]}]},
+    {"id": "windowing", "label": "Windowing", "widgets": [{"id": "windowing.main", "label": "Dialog/Overlay/Scrolled", "states": ["default", "active"]}]}
+  ]
+}

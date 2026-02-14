@@ -1,5 +1,11 @@
-use std::collections::HashMap;
-use std::process::Command;
+use std::collections::{HashMap, VecDeque};
+use std::io::{BufRead, BufReader, Write};
+use std::path::PathBuf;
+use std::process::{Child, ChildStdin, Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
 use venner_core::app_state::{
@@ -22,6 +28,350 @@ struct NativeDialogResult {
 struct AboutDialogResult {
     applied: bool,
     error: Option<String>,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ViewerLogEvent {
+    viewer_id: String,
+    stream: String,
+    line: String,
+    ts: u64,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ViewerRuntimeStatus {
+    viewer_id: String,
+    pid: Option<u32>,
+    running: bool,
+    started_at: u64,
+    command: String,
+    args: Vec<String>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GtkReferenceSummary {
+    baseline: GtkReferenceBaseline,
+    coverage: GtkReferenceCoverage,
+    policy: GtkReferencePolicy,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GtkReferenceBaseline {
+    gtk_version: String,
+    gtk_source_tag: String,
+    gtk_source_commit_sha: String,
+    baseline_date: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GtkReferenceCoverage {
+    total_rows: u64,
+    l3: u64,
+    l2: u64,
+    l1: u64,
+    na: u64,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GtkReferencePolicy {
+    done_gate: Vec<String>,
+    delta_vs_gtk: String,
+}
+
+#[derive(Debug)]
+struct ManagedViewerProcess {
+    child: Child,
+    stdin: ChildStdin,
+    started_at: u64,
+    command: String,
+    args: Vec<String>,
+}
+
+#[derive(Default)]
+struct ViewerManager {
+    processes: Mutex<HashMap<String, ManagedViewerProcess>>,
+    logs: Arc<Mutex<VecDeque<ViewerLogEvent>>>,
+}
+
+impl ViewerManager {
+    fn push_log(&self, event: ViewerLogEvent) {
+        if let Ok(mut logs) = self.logs.lock() {
+            logs.push_back(event);
+            while logs.len() > 3000 {
+                logs.pop_front();
+            }
+        }
+    }
+
+    fn spawn_viewer(
+        &self,
+        viewer_id: &str,
+        command: &str,
+        args: &[String],
+        cwd: Option<&str>,
+    ) -> Result<ViewerRuntimeStatus, String> {
+        let mut processes = self
+            .processes
+            .lock()
+            .map_err(|_| "viewer_processes_lock_failed".to_string())?;
+
+        if let Some(existing) = processes.get_mut(viewer_id) {
+            match existing.child.try_wait() {
+                Ok(Some(_)) => {
+                    processes.remove(viewer_id);
+                }
+                Ok(None) => {
+                    return Ok(ViewerRuntimeStatus {
+                        viewer_id: viewer_id.to_string(),
+                        pid: Some(existing.child.id()),
+                        running: true,
+                        started_at: existing.started_at,
+                        command: existing.command.clone(),
+                        args: existing.args.clone(),
+                    });
+                }
+                Err(err) => return Err(format!("viewer_try_wait_failed:{err}")),
+            }
+        }
+
+        let mut cmd = Command::new(command);
+        cmd.args(args)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
+
+        if let Some(dir) = cwd {
+            cmd.current_dir(dir);
+        }
+
+        let mut child = cmd.spawn().map_err(|err| format!("viewer_spawn_failed:{err}"))?;
+
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| "viewer_stdout_unavailable".to_string())?;
+        let stderr = child
+            .stderr
+            .take()
+            .ok_or_else(|| "viewer_stderr_unavailable".to_string())?;
+        let stdin = child
+            .stdin
+            .take()
+            .ok_or_else(|| "viewer_stdin_unavailable".to_string())?;
+
+        let now = now_unix();
+        let pid = child.id();
+        let id_out = viewer_id.to_string();
+        let id_err = viewer_id.to_string();
+        let logs_out = Arc::clone(&self.logs);
+        let logs_err = Arc::clone(&self.logs);
+
+        thread::spawn(move || {
+            let reader = BufReader::new(stdout);
+            for line in reader.lines().map_while(Result::ok) {
+                if let Ok(mut logs) = logs_out.lock() {
+                    logs.push_back(ViewerLogEvent {
+                        viewer_id: id_out.clone(),
+                        stream: "stdout".to_string(),
+                        line,
+                        ts: now_unix(),
+                    });
+                    while logs.len() > 3000 {
+                        logs.pop_front();
+                    }
+                }
+            }
+        });
+
+        thread::spawn(move || {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines().map_while(Result::ok) {
+                if let Ok(mut logs) = logs_err.lock() {
+                    logs.push_back(ViewerLogEvent {
+                        viewer_id: id_err.clone(),
+                        stream: "stderr".to_string(),
+                        line,
+                        ts: now_unix(),
+                    });
+                    while logs.len() > 3000 {
+                        logs.pop_front();
+                    }
+                }
+            }
+        });
+
+        let status = ViewerRuntimeStatus {
+            viewer_id: viewer_id.to_string(),
+            pid: Some(pid),
+            running: true,
+            started_at: now,
+            command: command.to_string(),
+            args: args.to_vec(),
+        };
+
+        self.push_log(ViewerLogEvent {
+            viewer_id: viewer_id.to_string(),
+            stream: "system".to_string(),
+            line: format!("spawned pid={pid} command={command}"),
+            ts: now,
+        });
+
+        processes.insert(
+            viewer_id.to_string(),
+            ManagedViewerProcess {
+                child,
+                stdin,
+                started_at: now,
+                command: command.to_string(),
+                args: args.to_vec(),
+            },
+        );
+
+        Ok(status)
+    }
+
+    fn stop_viewer(&self, viewer_id: &str) -> Result<(), String> {
+        let mut processes = self
+            .processes
+            .lock()
+            .map_err(|_| "viewer_processes_lock_failed".to_string())?;
+
+        let Some(mut process) = processes.remove(viewer_id) else {
+            return Ok(());
+        };
+
+        let _ = process.stdin.write_all(b"{\"method\":\"shutdown\"}\n");
+        let _ = process.stdin.flush();
+
+        match process.child.kill() {
+            Ok(_) => {
+                let _ = process.child.wait();
+                self.push_log(ViewerLogEvent {
+                    viewer_id: viewer_id.to_string(),
+                    stream: "system".to_string(),
+                    line: "stopped".to_string(),
+                    ts: now_unix(),
+                });
+                Ok(())
+            }
+            Err(err) => Err(format!("viewer_stop_failed:{err}")),
+        }
+    }
+
+    fn send_line(&self, viewer_id: &str, line: &str) -> Result<(), String> {
+        let mut processes = self
+            .processes
+            .lock()
+            .map_err(|_| "viewer_processes_lock_failed".to_string())?;
+        let Some(process) = processes.get_mut(viewer_id) else {
+            return Err("viewer_not_running".to_string());
+        };
+
+        process
+            .stdin
+            .write_all(format!("{line}\n").as_bytes())
+            .map_err(|err| format!("viewer_send_failed:{err}"))?;
+        process
+            .stdin
+            .flush()
+            .map_err(|err| format!("viewer_send_failed:{err}"))?;
+
+        Ok(())
+    }
+
+    fn list_statuses(&self) -> Result<Vec<ViewerRuntimeStatus>, String> {
+        let mut processes = self
+            .processes
+            .lock()
+            .map_err(|_| "viewer_processes_lock_failed".to_string())?;
+
+        let mut stale_ids = Vec::new();
+        let mut statuses = Vec::new();
+
+        for (viewer_id, process) in processes.iter_mut() {
+            let running = match process.child.try_wait() {
+                Ok(Some(_)) => false,
+                Ok(None) => true,
+                Err(_) => false,
+            };
+
+            if !running {
+                stale_ids.push(viewer_id.clone());
+            }
+
+            statuses.push(ViewerRuntimeStatus {
+                viewer_id: viewer_id.clone(),
+                pid: Some(process.child.id()),
+                running,
+                started_at: process.started_at,
+                command: process.command.clone(),
+                args: process.args.clone(),
+            });
+        }
+
+        for id in stale_ids {
+            processes.remove(&id);
+        }
+
+        Ok(statuses)
+    }
+
+    fn poll_logs(&self, limit: usize) -> Result<Vec<ViewerLogEvent>, String> {
+        let mut logs = self
+            .logs
+            .lock()
+            .map_err(|_| "viewer_logs_lock_failed".to_string())?;
+
+        let take = std::cmp::min(limit, logs.len());
+        let mut out = Vec::with_capacity(take);
+        for _ in 0..take {
+            if let Some(entry) = logs.pop_front() {
+                out.push(entry);
+            }
+        }
+
+        Ok(out)
+    }
+}
+
+fn now_unix() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
+}
+
+fn repo_root() -> Result<PathBuf, String> {
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let root = base
+        .join("../../..")
+        .canonicalize()
+        .map_err(|err| format!("repo_root_unavailable:{err}"))?;
+    Ok(root)
+}
+
+fn manifest_path(kind: &str, tech: &str) -> Result<PathBuf, String> {
+    let file = format!("{tech}.json");
+    let dir = match kind {
+        "themes" => "themes",
+        "widgets" => "widgets",
+        _ => return Err("invalid_manifest_kind".to_string()),
+    };
+
+    Ok(repo_root()?.join("tools").join("viewers").join("manifests").join(dir).join(file))
+}
+
+fn gtk_reference_summary_path() -> Result<PathBuf, String> {
+    Ok(repo_root()?
+        .join("tools")
+        .join("gtk-reference")
+        .join("source-mapping.summary.json"))
 }
 
 fn default_app_state() -> AppState {
@@ -66,6 +416,55 @@ fn log_to_terminal(level: String, message: String) {
         _ => "[LOG]",
     };
     println!("{tag} [frontend] {message}");
+}
+
+#[tauri::command]
+fn viewer_spawn(
+    manager: tauri::State<'_, ViewerManager>,
+    viewer_id: String,
+    command: String,
+    args: Vec<String>,
+    cwd: Option<String>,
+) -> Result<ViewerRuntimeStatus, String> {
+    let fallback_root = repo_root()?;
+    let run_cwd = cwd.unwrap_or_else(|| fallback_root.to_string_lossy().to_string());
+    manager.spawn_viewer(&viewer_id, &command, &args, Some(&run_cwd))
+}
+
+#[tauri::command]
+fn viewer_stop(manager: tauri::State<'_, ViewerManager>, viewer_id: String) -> Result<(), String> {
+    manager.stop_viewer(&viewer_id)
+}
+
+#[tauri::command]
+fn viewer_send(manager: tauri::State<'_, ViewerManager>, viewer_id: String, line: String) -> Result<(), String> {
+    manager.send_line(&viewer_id, &line)
+}
+
+#[tauri::command]
+fn viewer_list(manager: tauri::State<'_, ViewerManager>) -> Result<Vec<ViewerRuntimeStatus>, String> {
+    manager.list_statuses()
+}
+
+#[tauri::command]
+fn viewer_poll_logs(manager: tauri::State<'_, ViewerManager>, limit: Option<usize>) -> Result<Vec<ViewerLogEvent>, String> {
+    manager.poll_logs(limit.unwrap_or(200))
+}
+
+#[tauri::command]
+fn viewer_load_manifest(kind: String, tech: String) -> Result<serde_json::Value, String> {
+    let path = manifest_path(&kind, &tech)?;
+    let data = std::fs::read_to_string(&path).map_err(|err| format!("manifest_read_failed:{}:{err}", path.display()))?;
+    serde_json::from_str(&data).map_err(|err| format!("manifest_parse_failed:{}:{err}", path.display()))
+}
+
+#[tauri::command]
+fn load_gtk_reference_summary() -> Result<GtkReferenceSummary, String> {
+    let path = gtk_reference_summary_path()?;
+    let data = std::fs::read_to_string(&path)
+        .map_err(|err| format!("gtk_reference_summary_read_failed:{}:{err}", path.display()))?;
+    serde_json::from_str(&data)
+        .map_err(|err| format!("gtk_reference_summary_parse_failed:{}:{err}", path.display()))
 }
 
 #[cfg(target_os = "linux")]
@@ -151,6 +550,7 @@ pub fn run() {
                 .build(),
         )
         .manage(VennerStore::new(default_app_state()))
+        .manage(ViewerManager::default())
         .invoke_handler(tauri::generate_handler![
             venner_core::commands::dispatch,
             venner_core::commands::get_state,
@@ -161,6 +561,13 @@ pub fn run() {
             venner_core::commands::validate_state,
             venner_core::commands::get_gtk_theme,
             venner_core::commands::get_gtk_theme_diagnostics,
+            viewer_spawn,
+            viewer_stop,
+            viewer_send,
+            viewer_list,
+            viewer_poll_logs,
+            viewer_load_manifest,
+            load_gtk_reference_summary,
             open_file_dialog,
             open_color_dialog,
             open_font_dialog,

@@ -82,6 +82,25 @@ Expected result:
 - diagnostics update via `theme:diagnostics`
 - terminal shows `[theme] ...` lines with source/path/tokens
 
+## Dev Hub (meta-app for viewers)
+
+`apps/dev` zawiera teraz panel `Dev Hub: Viewer Launcher`, który zarządza mini-apkami:
+
+- `gtk4-widget-viewer` (process, GJS)
+- `adw-widget-viewer` (process, GJS)
+- `venner-widget-viewer` (internal)
+- `gtk4-theme-viewer` (process, GJS)
+- `adw-theme-viewer` (process, GJS)
+- `venner-theme-viewer` (internal)
+
+Hub umożliwia:
+
+- start/stop/restart viewerów procesowych,
+- przełączanie aktywnej mini-apki (`one active app`),
+- wysyłanie komend widget/theme przez JSON-lines RPC,
+- podgląd runtime status i logów,
+- fallback manifesty dla `widgets` i `themes` z `tools/viewers/manifests/`.
+
 ## SSoT Import / Export
 
 `apps/dev` includes a panel `SSoT Import/Export` that supports:

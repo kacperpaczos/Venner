@@ -107,6 +107,8 @@ else
   require_cmd gjs
 fi
 
+log_info "Profil uruchomienia: mode=${RUN_MODE} gtk4=${RUN_GTK4} libadwaita=${RUN_LIBADWAITA}"
+
 GTK4_APP="$REPO_ROOT/tools/gtk-reference/gtk4-gjs/app.js"
 ADW_APP="$REPO_ROOT/tools/gtk-reference/libadwaita-gjs/app.js"
 
