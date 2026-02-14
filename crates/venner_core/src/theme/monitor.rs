@@ -31,8 +31,6 @@ pub fn load_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnosti
     let settings = resolver::read_theme_settings();
     let now = unix_ts();
 
-    let mut fallback_reason: Option<String> = None;
-
     let system_resolved =
         resolver::resolve_theme_css_path(&settings.gtk_theme, settings.color_scheme);
     if let Some((path, version)) = system_resolved {
@@ -62,27 +60,37 @@ pub fn load_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnosti
                     );
                     return (tokens, diagnostics);
                 }
-                fallback_reason = Some(format!(
+                let fallback_reason = Some(format!(
                     "system_theme_parsed_empty:path={} gtk={}",
                     path.display(),
                     version
                 ));
+                return try_project_or_default(settings, now, fallback_reason);
             }
             Err(err) => {
-                fallback_reason = Some(format!(
+                let fallback_reason = Some(format!(
                     "system_theme_read_failed:path={} err={err}",
                     path.display()
                 ));
+                return try_project_or_default(settings, now, fallback_reason);
             }
         }
     } else {
-        fallback_reason = Some(format!(
+        let fallback_reason = Some(format!(
             "system_theme_not_found:theme={} scheme={}",
             settings.gtk_theme,
             color_scheme_label(settings.color_scheme)
         ));
+        return try_project_or_default(settings, now, fallback_reason);
     }
+    unreachable!("all branches in load_theme_with_diagnostics return");
+}
 
+fn try_project_or_default(
+    settings: resolver::ThemeSettings,
+    now: u64,
+    mut fallback_reason: Option<String>,
+) -> (HashMap<String, String>, ThemeDiagnostics) {
     if let Some(base) = path::project_themes_dir() {
         if let Some((project_css, version)) =
             path::resolve_project_theme(&base, &settings.gtk_theme, settings.color_scheme)

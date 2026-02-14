@@ -6,15 +6,21 @@
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 
-export type ThemeTokens = { bg: string; fg: string; accent: string }
+export type ThemeTokens = { bg?: string; fg?: string; accent?: string }
 
-export type WindowState = { id: string; x: number; y: number; width: number; height: number; maximized: boolean; focused: boolean; route: string }
+export type WindowState = { id: string; x?: number; y?: number; width?: number; height?: number; maximized?: boolean; focused?: boolean; route?: string; scroll?: ScrollState; viewport?: ViewportState }
 
-export type WidgetState = { id: string; kind: string; props: JsonValue }
+export type WidgetState = { id: string; kind: string; disabled?: boolean; persistent?: JsonValue; transient?: JsonValue; updatedAt?: number; source?: string }
 
 /**
  * Single Source of Truth - cały stan aplikacji
  */
-export type AppState = { version: number; windows: Partial<{ [key in string]: WindowState }>; widgets: Partial<{ [key in string]: WidgetState }>; theme: ThemeTokens }
+export type AppState = { version?: number; schemaVersion?: number; session?: SessionState; windows?: Partial<{ [key in string]: WindowState }>; widgets?: Partial<{ [key in string]: WidgetState }>; ui?: UiState; theme?: ThemeTokens }
 
-export type Action = { WidgetUpdate: { widget_id: string; field: string; value: JsonValue } } | { WindowResize: { window_id: string; width: number; height: number } } | { WindowMove: { window_id: string; x: number; y: number } } | { Navigate: { window_id: string; route: string } } | { ThemeChanged: { tokens: ThemeTokens } }
+export type PersistedAppState = { schemaVersion: number; exportedAt: number; appVersion: string; state: AppState }
+
+export type ValidationReport = { valid: boolean; schemaVersion: number | null; targetSchemaVersion: number; errors: string[]; warnings: string[] }
+
+export type ImportResult = { applied: boolean; migratedFrom: number | null; schemaVersion: number; warnings: string[]; errors: string[] }
+
+export type Action = { type: "WidgetRegister"; widget_id: string; kind: string; initial: JsonValue | null } | { type: "WidgetStatePatch"; widget_id: string; patch: JsonValue } | { type: "WidgetTransient"; widget_id: string; transient: JsonValue } | { type: "WidgetCommit"; widget_id: string; value: JsonValue } | { type: "WidgetDisable"; widget_id: string; disabled: boolean } | { type: "WidgetUpdate"; widget_id: string; field: string; value: JsonValue } | { type: "WindowResize"; window_id: string; width: number; height: number } | { type: "WindowMove"; window_id: string; x: number; y: number } | { type: "SessionUpdate"; patch: JsonValue } | { type: "WindowScroll"; window_id: string; x: number; y: number; anchor_id: string | null } | { type: "WindowViewport"; window_id: string; zoom: number; density: string | null; breakpoint: string | null } | { type: "UiTabsUpdate"; id: string; active_tab: string } | { type: "UiFocusUpdate"; widget_id: string | null; caret_start: number | null; caret_end: number | null } | { type: "UiPanelUpdate"; id: string; collapsed: boolean } | { type: "Navigate"; window_id: string; route: string } | { type: "ThemeChanged"; tokens: ThemeTokens }
