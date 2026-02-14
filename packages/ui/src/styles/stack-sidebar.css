@@ -1,0 +1,37 @@
+.venner-stack-sidebar {
+	display: grid;
+	grid-template-columns: 220px 1fr;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	border-radius: 10px;
+	overflow: hidden;
+	min-height: 260px;
+}
+
+.venner-stack-sidebar-nav {
+	padding: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	background: color-mix(in srgb, var(--venner-bg, #fff) 94%, #000 6%);
+	border-right: 1px solid var(--venner-border, #c5c9d3);
+}
+
+.venner-stack-sidebar-item {
+	padding: 7px 10px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	border-radius: 7px;
+	background: transparent;
+	color: var(--venner-fg, #222);
+	text-align: left;
+	cursor: pointer;
+}
+
+.venner-stack-sidebar-item[data-active="true"] {
+	background: color-mix(in srgb, var(--venner-accent, #3584e4) 16%, transparent);
+	border-color: color-mix(in srgb, var(--venner-accent, #3584e4) 70%, var(--venner-border, #c5c9d3) 30%);
+}
+
+.venner-stack-sidebar-content {
+	padding: 12px;
+	background: color-mix(in srgb, var(--venner-bg, #fff) 97%, #000 3%);
+}

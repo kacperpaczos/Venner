@@ -1,0 +1,33 @@
+.venner-spinner {
+	display: inline-block;
+	border-radius: 50%;
+	border: 2px solid color-mix(in srgb, var(--venner-fg) 20%, transparent);
+	border-top-color: var(--venner-accent);
+	animation: venner-spin 900ms linear infinite;
+}
+
+.venner-spinner[data-size="sm"] {
+	width: 14px;
+	height: 14px;
+}
+
+.venner-spinner[data-size="md"] {
+	width: 18px;
+	height: 18px;
+}
+
+.venner-spinner[data-size="lg"] {
+	width: 24px;
+	height: 24px;
+}
+
+.venner-spinner[data-active="false"] {
+	animation: none;
+	opacity: 0.45;
+}
+
+@keyframes venner-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

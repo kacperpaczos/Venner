@@ -9,9 +9,18 @@ export { invoke } from "./api/invoke";
 export { events, listen } from "./api/listen";
 export { store } from "./store";
 export type {
+	AboutDialogResult,
 	Action,
 	AppState,
+	ImportResult,
+	NativeDialogResult,
+	PersistedAppState,
+	SessionState,
+	ThemeDiagnostics,
+	ThemeSource,
 	ThemeTokens,
+	UiState,
+	ValidationReport,
 	WidgetState,
 	WindowState,
 } from "./types";

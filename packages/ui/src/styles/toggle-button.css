@@ -1,0 +1,21 @@
+.venner-toggle-button {
+	padding: var(--venner-btn-padding, 6px 12px);
+	min-height: var(--venner-btn-min-height, 36px);
+	border-radius: var(--venner-btn-radius, 6px);
+	border: 1px solid var(--venner-btn-border, var(--venner-border));
+	background: var(--venner-btn-bg);
+	color: var(--venner-btn-fg);
+	font: inherit;
+	cursor: pointer;
+}
+
+.venner-toggle-button[data-pressed="true"] {
+	background: var(--venner-btn-accent);
+	color: #fff;
+	border-color: transparent;
+}
+
+.venner-toggle-button[data-disabled="true"] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}

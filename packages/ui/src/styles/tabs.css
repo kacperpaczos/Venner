@@ -1,0 +1,43 @@
+.venner-tabs {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	width: 100%;
+}
+
+.venner-tablist {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	border: 1px solid var(--venner-tabs-border, var(--venner-border));
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--venner-tabs-bg, var(--venner-bg));
+}
+
+.venner-tab {
+	border: 0;
+	border-right: 1px solid var(--venner-tabs-border, var(--venner-border));
+	padding: 8px 12px;
+	font: inherit;
+	color: var(--venner-tabs-fg, var(--venner-fg));
+	background: transparent;
+	cursor: pointer;
+}
+
+.venner-tab:last-child {
+	border-right: 0;
+}
+
+.venner-tab[data-active="true"] {
+	background: var(--venner-tabs-active-bg, var(--venner-bg));
+	color: var(--venner-tabs-active-fg, var(--venner-fg));
+}
+
+.venner-tabpanel {
+	min-height: 240px;
+	padding: 12px;
+	border: 1px solid var(--venner-tabs-border, var(--venner-border));
+	border-radius: 6px;
+	background: transparent;
+	color: var(--venner-fg);
+}

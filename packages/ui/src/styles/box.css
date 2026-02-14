@@ -1,0 +1,27 @@
+.venner-box {
+	display: flex;
+}
+
+.venner-box[data-orientation="vertical"] {
+	flex-direction: column;
+}
+
+.venner-box[data-orientation="horizontal"] {
+	flex-direction: row;
+}
+
+.venner-box[data-align="start"] {
+	align-items: flex-start;
+}
+
+.venner-box[data-align="center"] {
+	align-items: center;
+}
+
+.venner-box[data-align="end"] {
+	align-items: flex-end;
+}
+
+.venner-box[data-align="stretch"] {
+	align-items: stretch;
+}

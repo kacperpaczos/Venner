@@ -9,6 +9,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
+import type { ThemeDiagnostics } from "@venner/themes-gnome";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
 
@@ -34,3 +35,20 @@ export const pluginLog = {
 	warn: termLog.warn,
 	error: termLog.error,
 } as const;
+
+export const themeLog = {
+	loaded: async (diagnostics: ThemeDiagnostics) =>
+		termLog.info(
+			`[theme] source=${diagnostics.source} theme=${diagnostics.gtk_theme} scheme=${diagnostics.color_scheme} path=${diagnostics.resolved_css_path ?? "<none>"} gtk=${diagnostics.resolved_gtk_version} tokens=${diagnostics.tokens_count}`,
+		),
+	fallback: async (diagnostics: ThemeDiagnostics) => {
+		if (!diagnostics.fallback_reason) return;
+		await termLog.warn(
+			`[theme] fallback source=${diagnostics.source} reason=${diagnostics.fallback_reason}`,
+		);
+	},
+	changed: async (diagnostics: ThemeDiagnostics) =>
+		termLog.info(
+			`[theme] changed source=${diagnostics.source} path=${diagnostics.resolved_css_path ?? "<none>"} tokens=${diagnostics.tokens_count}`,
+		),
+};

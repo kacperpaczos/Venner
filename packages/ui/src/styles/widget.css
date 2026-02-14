@@ -1,0 +1,18 @@
+.venner-widget {
+	color: var(--venner-fg, #222);
+	background: transparent;
+}
+
+.venner-widget[data-disabled="true"] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.venner-widget[data-focused="true"] {
+	outline: 2px solid color-mix(in srgb, var(--venner-accent, #3584e4) 70%, transparent);
+	outline-offset: 2px;
+}
+
+.venner-widget[data-selected="true"] {
+	background: color-mix(in srgb, var(--venner-accent, #3584e4) 14%, transparent);
+}

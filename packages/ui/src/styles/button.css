@@ -45,6 +45,24 @@
 	color: white;
 }
 
+.venner-button[data-variant="default"] {
+	background: var(--venner-btn-bg);
+	color: var(--venner-btn-fg);
+	border-color: var(--venner-btn-border, var(--venner-border));
+}
+
+.venner-button[data-variant="suggested"] {
+	background: var(--venner-btn-accent, var(--venner-accent));
+	color: #ffffff;
+	border-color: transparent;
+}
+
+.venner-button[data-variant="destructive"] {
+	background: var(--venner-error, #cc0000);
+	color: #ffffff;
+	border-color: transparent;
+}
+
 .venner-button[data-variant="secondary"] {
 	background: transparent;
 	border: 1px solid var(--venner-btn-accent);

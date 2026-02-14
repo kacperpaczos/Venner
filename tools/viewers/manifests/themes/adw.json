@@ -1,0 +1,17 @@
+{
+  "tech": "adw",
+  "palette": [
+    {"name": "bg", "value": "#242424"},
+    {"name": "fg", "value": "#ffffff"},
+    {"name": "accent", "value": "#78aeed"},
+    {"name": "border", "value": "#4a4a4a"},
+    {"name": "muted", "value": "#b0b0b0"}
+  ],
+  "tokens": [
+    {"name": "--venner-bg", "value": "#242424"},
+    {"name": "--venner-fg", "value": "#ffffff"},
+    {"name": "--venner-accent", "value": "#78aeed"},
+    {"name": "--venner-border", "value": "#4a4a4a"},
+    {"name": "--venner-muted", "value": "#b0b0b0"}
+  ]
+}

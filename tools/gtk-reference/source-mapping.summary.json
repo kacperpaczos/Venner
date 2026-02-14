@@ -1,0 +1,25 @@
+{
+  "baseline": {
+    "gtkVersion": "4.20.3",
+    "gtkSourceTag": "upstream/4.20.3",
+    "gtkSourceCommitSha": "10c07849e1b1750158eeef32ad1389f1f35f48dd",
+    "baselineDate": "2026-02-14"
+  },
+  "coverage": {
+    "totalRows": 49,
+    "l3": 30,
+    "l2": 19,
+    "l1": 0,
+    "na": 0
+  },
+  "policy": {
+    "doneGate": [
+      "adapter",
+      "fsm_or_documented_exception",
+      "token_styles",
+      "viewer_coverage",
+      "status_docs"
+    ],
+    "deltaVsGtk": "For non-1:1 web mapping, semantic adapter + documented delta is required."
+  }
+}

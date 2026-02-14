@@ -1,0 +1,17 @@
+{
+  "tech": "gtk4",
+  "palette": [
+    {"name": "bg", "value": "#353535"},
+    {"name": "fg", "value": "#eeeeec"},
+    {"name": "accent", "value": "#3584e4"},
+    {"name": "border", "value": "#5f5f5f"},
+    {"name": "muted", "value": "#9a9996"}
+  ],
+  "tokens": [
+    {"name": "--venner-bg", "value": "#353535"},
+    {"name": "--venner-fg", "value": "#eeeeec"},
+    {"name": "--venner-accent", "value": "#3584e4"},
+    {"name": "--venner-border", "value": "#5f5f5f"},
+    {"name": "--venner-muted", "value": "#9a9996"}
+  ]
+}

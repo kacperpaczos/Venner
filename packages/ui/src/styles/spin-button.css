@@ -1,0 +1,21 @@
+.venner-spin-button {
+	display: inline-flex;
+	align-items: stretch;
+	gap: 6px;
+}
+
+.venner-spin-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.venner-spin-controls button {
+	width: 28px;
+	height: 16px;
+	line-height: 1;
+	border: 1px solid var(--venner-border);
+	border-radius: 4px;
+	background: var(--venner-btn-bg);
+	color: var(--venner-btn-fg);
+}

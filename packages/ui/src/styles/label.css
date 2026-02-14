@@ -1,0 +1,15 @@
+.venner-label {
+	display: inline-block;
+	color: var(--venner-fg, #222);
+	font-family: var(--venner-font, system-ui, sans-serif);
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.venner-label[data-muted="true"] {
+	opacity: 0.78;
+}
+
+.venner-label[data-strong="true"] {
+	font-weight: 600;
+}

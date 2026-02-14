@@ -1,0 +1,17 @@
+{
+  "tech": "venner",
+  "palette": [
+    {"name": "bg", "value": "#353535"},
+    {"name": "fg", "value": "#eeeeec"},
+    {"name": "accent", "value": "#3584e4"},
+    {"name": "surface", "value": "#404040"},
+    {"name": "border", "value": "#666666"}
+  ],
+  "tokens": [
+    {"name": "--venner-bg", "value": "#353535"},
+    {"name": "--venner-fg", "value": "#eeeeec"},
+    {"name": "--venner-accent", "value": "#3584e4"},
+    {"name": "--venner-surface", "value": "#404040"},
+    {"name": "--venner-border", "value": "#666666"}
+  ]
+}

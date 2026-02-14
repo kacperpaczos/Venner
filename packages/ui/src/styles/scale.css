@@ -1,0 +1,4 @@
+.venner-scale {
+	width: min(260px, 100%);
+	accent-color: var(--venner-accent);
+}

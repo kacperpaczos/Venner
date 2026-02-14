@@ -1,0 +1,22 @@
+.venner-expander {
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--venner-bg) 95%, #000 5%);
+}
+
+.venner-expander-header {
+	width: 100%;
+	text-align: left;
+	padding: 8px 10px;
+	border: 0;
+	background: transparent;
+	color: var(--venner-fg);
+	font: inherit;
+	cursor: pointer;
+}
+
+.venner-expander-content {
+	padding: 10px;
+	border-top: 1px solid var(--venner-border);
+}

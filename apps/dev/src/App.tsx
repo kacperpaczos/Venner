@@ -1,21 +1,27 @@
-import { Button } from "@venner/solid";
-import { injectGnomeTheme } from "@venner/themes-gnome";
-import { termLog } from "./logger";
+import { getThemeDiagnostics, getThemeTokens, injectGnomeTheme, type ThemeDiagnostics } from "@venner/themes-gnome";
+import { createSignal, onMount } from "solid-js";
+import { HubPanel } from "./HubPanel";
 import "@venner/ui/styles/tokens.css";
 import "./App.css";
 
-injectGnomeTheme();
-
 function App() {
+	const [diagnostics, setDiagnostics] = createSignal<ThemeDiagnostics | null>(null);
+	const [tokens, setTokens] = createSignal<Record<string, string>>({});
+
+	const refreshTheme = async () => {
+		const [nextTokens, nextDiagnostics] = await Promise.all([getThemeTokens(), getThemeDiagnostics()]);
+		setTokens(nextTokens);
+		setDiagnostics(nextDiagnostics);
+	};
+
+	onMount(async () => {
+		await injectGnomeTheme();
+		await refreshTheme();
+	});
+
 	return (
-		<main class="container">
-			<h1>Venner Dev</h1>
-			<p>Przycisk w stylu GNOME (motyw z systemu).</p>
-			<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-				<Button onClick={() => termLog.info("Button clicked")}>Click me</Button>
-				<Button variant="secondary">Secondary</Button>
-				<Button disabled>Disabled</Button>
-			</div>
+		<main class="dev-shell">
+			<HubPanel vennerTokens={tokens()} vennerDiagnostics={diagnostics()} />
 		</main>
 	);
 }

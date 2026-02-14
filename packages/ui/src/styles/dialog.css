@@ -1,0 +1,72 @@
+.venner-dialog-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.42);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+}
+
+.venner-dialog {
+	width: min(520px, calc(100vw - 24px));
+	border-radius: 10px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	background: var(--venner-bg, #fff);
+	color: var(--venner-fg, #222);
+	box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+	display: flex;
+	flex-direction: column;
+}
+
+.venner-dialog-title {
+	padding: 12px 14px;
+	font-size: 15px;
+	font-weight: 600;
+	border-bottom: 1px solid var(--venner-border, #c5c9d3);
+}
+
+.venner-dialog-body {
+	padding: 12px 14px;
+}
+
+.venner-dialog-actions {
+	padding: 10px 14px 14px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.venner-dialog-btn {
+	padding: 6px 12px;
+	border-radius: 7px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	cursor: pointer;
+}
+
+.venner-dialog-btn.secondary {
+	background: color-mix(in srgb, var(--venner-bg, #fff) 92%, #000 8%);
+	color: var(--venner-fg, #222);
+}
+
+.venner-dialog-btn.primary {
+	background: var(--venner-accent, #3584e4);
+	color: #fff;
+	border-color: color-mix(in srgb, var(--venner-accent, #3584e4) 80%, #000 20%);
+}
+
+.venner-message-body {
+	margin: 0;
+}
+
+.venner-message-body.warning {
+	color: var(--venner-warning, #d28b00);
+}
+
+.venner-message-body.error {
+	color: var(--venner-error, #d73a49);
+}
+
+.venner-about-dialog p {
+	margin: 0 0 8px;
+}

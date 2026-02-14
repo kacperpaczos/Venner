@@ -1,4 +1,12 @@
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
+import type {
+	AboutDialogResult,
+	AppState,
+	ImportResult,
+	NativeDialogResult,
+	ThemeDiagnostics,
+	ValidationReport,
+} from "../types";
 
 /**
  * Invoke a Tauri command with type-safe arguments
@@ -15,6 +23,18 @@ export async function invoke<T>(
  */
 export const store = {
 	dispatch: (action: unknown) => invoke<void>("dispatch", { action }),
-	getState: () => invoke<unknown>("get_state"),
-	injectState: (state: unknown) => invoke<void>("inject_state", { state }),
+	getState: () => invoke<AppState>("get_state"),
+	injectState: (state: AppState) => invoke<void>("inject_state", { state }),
+	getSchemaVersion: () => invoke<number>("get_schema_version"),
+	exportState: () => invoke<string>("export_state"),
+	validateState: (json: string) =>
+		invoke<ValidationReport>("validate_state", { json }),
+	importState: (json: string) => invoke<ImportResult>("import_state", { json }),
+	getGtkTheme: () => invoke<Record<string, string>>("get_gtk_theme"),
+	getGtkThemeDiagnostics: () =>
+		invoke<ThemeDiagnostics>("get_gtk_theme_diagnostics"),
+	openFileDialog: () => invoke<NativeDialogResult>("open_file_dialog"),
+	openColorDialog: () => invoke<NativeDialogResult>("open_color_dialog"),
+	openFontDialog: () => invoke<NativeDialogResult>("open_font_dialog"),
+	showAboutDialog: () => invoke<AboutDialogResult>("show_about_dialog"),
 };

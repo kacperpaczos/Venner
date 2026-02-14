@@ -41,3 +41,5 @@ export async function injectGnomeTheme(): Promise<void> {
 		);
 	}
 }
+
+export { getThemeDiagnostics, getThemeTokens, type ThemeDiagnostics } from "./loader";

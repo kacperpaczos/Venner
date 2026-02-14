@@ -4614,6 +4614,7 @@ name = "venner_core"
 version = "0.1.0"
 dependencies = [
  "dirs 5.0.1",
+ "log",
  "regex",
  "serde",
  "serde_json",

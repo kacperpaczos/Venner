@@ -1,0 +1,4 @@
+.venner-list-box { border: 1px solid var(--venner-border); border-radius: 8px; overflow: hidden; min-width: 240px; }
+.venner-list-box-row { width: 100%; text-align: left; padding: 8px 10px; border: 0; border-bottom: 1px solid var(--venner-border); background: transparent; color: var(--venner-fg); }
+.venner-list-box-row:last-child { border-bottom: 0; }
+.venner-list-box-row[data-active="true"] { background: color-mix(in srgb, var(--venner-accent) 16%, var(--venner-bg)); }

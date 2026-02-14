@@ -1,5 +1,6 @@
 //! Theme resolver: desktop detection, gsettings read, CSS path resolution.
 
+use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
@@ -13,6 +14,18 @@ pub enum DesktopEnv {
     Unknown(String),
 }
 
+impl fmt::Display for DesktopEnv {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DesktopEnv::Gnome => write!(f, "gnome"),
+            DesktopEnv::Cinnamon => write!(f, "cinnamon"),
+            DesktopEnv::Kde => write!(f, "kde"),
+            DesktopEnv::Xfce => write!(f, "xfce"),
+            DesktopEnv::Unknown(v) => write!(f, "unknown:{v}"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorScheme {
     Default,
@@ -22,6 +35,8 @@ pub enum ColorScheme {
 
 #[derive(Debug, Clone)]
 pub struct ThemeSettings {
+    pub desktop_env: DesktopEnv,
+    pub schema: String,
     pub gtk_theme: String,
     pub color_scheme: ColorScheme,
     pub accent_color: Option<String>,
@@ -35,6 +50,23 @@ pub enum ThemeGtkVersion {
     Gtk4,
     Gtk3,
     Unknown,
+}
+
+impl fmt::Display for ThemeGtkVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ThemeGtkVersion::Gtk4 => write!(f, "gtk4"),
+            ThemeGtkVersion::Gtk3 => write!(f, "gtk3"),
+            ThemeGtkVersion::Unknown => write!(f, "unknown"),
+        }
+    }
+}
+
+pub fn theme_schema_for_desktop(desktop: &DesktopEnv) -> &'static str {
+    match desktop {
+        DesktopEnv::Cinnamon => "org.cinnamon.desktop.interface",
+        _ => "org.gnome.desktop.interface",
+    }
 }
 
 pub fn detect_desktop() -> DesktopEnv {
@@ -61,14 +93,19 @@ fn gsettings_get(schema: &str, key: &str) -> Option<String> {
         .trim()
         .trim_matches('\'')
         .to_string();
-    if s.is_empty() { None } else { Some(s) }
+    if s.is_empty() {
+        None
+    } else {
+        Some(s)
+    }
 }
 
 pub fn read_theme_settings() -> ThemeSettings {
     let desktop = detect_desktop();
-    let (schema, has_color_scheme, has_accent) = match desktop {
-        DesktopEnv::Cinnamon => ("org.cinnamon.desktop.interface", false, false),
-        _ => ("org.gnome.desktop.interface", true, true),
+    let schema = theme_schema_for_desktop(&desktop);
+    let (has_color_scheme, has_accent) = match &desktop {
+        DesktopEnv::Cinnamon => (false, false),
+        _ => (true, true),
     };
 
     let gtk_theme = gsettings_get(schema, "gtk-theme")
@@ -99,6 +136,8 @@ pub fn read_theme_settings() -> ThemeSettings {
         gsettings_get(schema, "cursor-theme").unwrap_or_else(|| "Adwaita".to_string());
 
     ThemeSettings {
+        desktop_env: desktop,
+        schema: schema.to_string(),
         gtk_theme,
         color_scheme,
         accent_color,

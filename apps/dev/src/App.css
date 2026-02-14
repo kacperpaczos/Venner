@@ -1,116 +1,213 @@
-.logo.vite:hover {
-	filter: drop-shadow(0 0 2em #747bff);
+.dev-shell {
+	min-height: 100vh;
+	background: var(--venner-bg);
+	color: var(--venner-fg);
+	padding: 12px;
+	box-sizing: border-box;
 }
 
-.logo.solid:hover {
-	filter: drop-shadow(0 0 2em #2f5d90);
-}
-:root {
-	font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-	font-size: 16px;
-	line-height: 24px;
-	font-weight: 400;
-
-	color: #0f0f0f;
-	background-color: #f6f6f6;
-
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-text-size-adjust: 100%;
+.dev-layout {
+	display: grid;
+	grid-template-columns: 250px 1fr;
+	gap: 12px;
+	align-items: start;
+	max-width: 1400px;
+	margin: 0 auto;
 }
 
-.container {
-	margin: 0;
-	padding-top: 10vh;
+.dev-sidebar {
+	position: sticky;
+	top: 12px;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	text-align: center;
+	gap: 8px;
+	border: 1px solid var(--venner-border);
+	border-radius: 10px;
+	padding: 10px;
+	background: color-mix(in srgb, var(--venner-bg) 94%, #000 6%);
 }
 
-.logo {
-	height: 6em;
-	padding: 1.5em;
-	will-change: filter;
-	transition: 0.75s;
+.dev-title {
+	margin: 0 0 4px;
+	font-size: 20px;
+	font-weight: 600;
 }
 
-.logo.tauri:hover {
-	filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
+.dev-nav-btn {
 	display: flex;
-	justify-content: center;
-}
-
-a {
-	font-weight: 500;
-	color: #646cff;
-	text-decoration: inherit;
-}
-
-a:hover {
-	color: #535bf2;
-}
-
-h1 {
-	text-align: center;
-}
-
-input,
-button {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	padding: 9px;
+	border: 1px solid var(--venner-border);
 	border-radius: 8px;
-	border: 1px solid transparent;
-	padding: 0.6em 1.2em;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	color: #0f0f0f;
-	background-color: #ffffff;
-	transition: border-color 0.25s;
-	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+	background: var(--venner-btn-bg);
+	color: var(--venner-btn-fg);
+	cursor: pointer;
+	text-align: left;
 }
 
-button {
+.dev-nav-btn small {
+	opacity: 0.75;
+	font-size: 12px;
+}
+
+.dev-nav-btn.active {
+	outline: 2px solid var(--venner-accent);
+}
+
+.dev-nav-btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.dev-main {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.dev-card {
+	border: 1px solid var(--venner-border);
+	border-radius: 10px;
+	padding: 12px;
+	background: color-mix(in srgb, var(--venner-bg) 95%, #000 5%);
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.dev-card h3,
+.dev-card h4 {
+	margin: 0;
+}
+
+.dev-select {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--venner-bg) 90%, #000 10%);
+	color: var(--venner-fg);
+}
+
+.dev-select option {
+	background-color: var(--venner-bg);
+	color: var(--venner-fg);
+}
+
+.dev-check-row {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.dev-check-row label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	padding: 8px;
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--venner-bg) 92%, #000 8%);
+}
+
+.dev-action-row {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.dev-btn {
+	padding: 7px 12px;
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	background: var(--venner-btn-bg);
+	color: var(--venner-btn-fg);
 	cursor: pointer;
 }
 
-button:hover {
-	border-color: #396cd8;
-}
-button:active {
-	border-color: #396cd8;
-	background-color: #e8e8e8;
+.dev-btn.secondary {
+	opacity: 0.9;
 }
 
-input,
-button {
-	outline: none;
+.dev-btn:disabled {
+	opacity: 0.6;
+	cursor: wait;
 }
 
-#greet-input {
-	margin-right: 5px;
+.theme-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 10px;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		color: #f6f6f6;
-		background-color: #2f2f2f;
+.theme-card {
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	background: color-mix(in srgb, var(--venner-bg) 92%, #000 8%);
+}
+
+.theme-meta {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 4px 8px;
+	font-size: 12px;
+}
+
+.palette-mini {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 6px;
+}
+
+.swatch-chip {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 11px;
+}
+
+.swatch-color {
+	height: 22px;
+	border-radius: 4px;
+	border: 1px solid var(--venner-border);
+}
+
+.tokens-preview,
+.activity-log {
+	margin: 0;
+	padding: 8px;
+	border: 1px solid var(--venner-border);
+	border-radius: 8px;
+	max-height: 220px;
+	overflow: auto;
+	font-size: 12px;
+	line-height: 1.35;
+	font-family: ui-monospace, monospace;
+	background: color-mix(in srgb, var(--venner-bg) 90%, #000 10%);
+	color: var(--venner-fg);
+}
+
+@media (max-width: 960px) {
+	.dev-layout {
+		grid-template-columns: 1fr;
 	}
 
-	a:hover {
-		color: #24c8db;
+	.dev-sidebar {
+		position: static;
 	}
 
-	input,
-	button {
-		color: #ffffff;
-		background-color: #0f0f0f98;
+	.dev-check-row {
+		grid-template-columns: 1fr;
 	}
-	button:active {
-		background-color: #0f0f0f69;
+
+	.theme-meta {
+		grid-template-columns: 1fr;
 	}
 }

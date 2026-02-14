@@ -5,7 +5,10 @@ pub mod state;
 pub mod theme;
 
 // Re-eksporty dla zewnętrznych crate'ów
-pub use state::{Action, AppState, ThemeTokens, VennerStore, WidgetState, WindowState};
+pub use state::{
+    Action, AppState, ImportResult, PersistedAppState, ThemeTokens, ValidationReport, VennerStore,
+    WidgetState, WindowState,
+};
 
 // Kompatybilność wsteczna: venner_core::commands, venner_core::theme_monitor, venner_core::app_state
 pub mod app_state {
