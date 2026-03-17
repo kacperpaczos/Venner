@@ -1,0 +1,11 @@
+P0
+- [ ] Rename CSS/UI prefix from "venne" to "vn" across codebase (classes, vars, selectors).
+- [ ] Implement stable gsettings monitoring in Rust via gio (replace temporary watcher path).
+
+P1
+- [ ] Complete KDE support parity (loader, tokens, fallback behavior, runtime checks).
+- [ ] Move app/xapps instance bootstrap to higher app layer (clear ownership in architecture).
+
+P2
+- [ ] Document gsettings monitoring flow: startup, updates, fallback, error handling.
+- [ ] Add validation checklist for GNOME/KDE live theme switching and regressions.
