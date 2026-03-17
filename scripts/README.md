@@ -17,7 +17,7 @@ Ten katalog zawiera cały workflow po `git clone`.
 - `test.sh` - uruchamia testy JS/TS i Rust.
 - `dev.sh` - zawsze czyści deps JS, robi install deps, przebudowuje workspace (chyba że `--skip-build`) i startuje appkę dev.
 - `run-gtk-ref.sh` - uruchamia referencyjne appki GJS (GTK4 i/lub Libadwaita) do parity workflow.
-- `run-viewer.sh` - uruchamia pojedynczy mini-viewer (`gtk4/adw`, `widget/theme`) poza hubem.
+- `run-viewer.sh` - uruchamia pojedynczy mini-viewer (`gtk4/adw/venner`, `widget/theme`) poza hubem.
 
 ## Kontrakt skryptów
 

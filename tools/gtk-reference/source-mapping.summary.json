@@ -20,6 +20,6 @@
       "viewer_coverage",
       "status_docs"
     ],
-    "deltaVsGtk": "For non-1:1 web mapping, semantic adapter + documented delta is required."
+    "deltaVsGtk": "Native fidelity first. Any non-1:1 mapping must be explicitly documented as a platform-constrained exception."
   }
 }

@@ -9,8 +9,7 @@ What is measured:
 - known deltas where web platform constraints prevent native 1:1 behavior.
 
 What is explicitly out of scope:
-- automated pixel-perfect comparison,
-- native GTK renderer equivalence inside the web runtime.
+- strict pixel-diff as the only acceptance gate.
 
 Audience:
 - engineers implementing GTK parity,
@@ -45,7 +44,8 @@ Evaluation dimensions:
 - documented delta vs GTK for non-1:1 mappings.
 
 Theme model note:
-- Venner uses theme token extraction and CSS token mapping, not native GTK CSS rendering in web components.
+- Venner targets native fidelity first by compiling GTK theme rules into runtime web styles.
+- Any non-1:1 behavior must be explicitly documented as a platform constraint exception.
 
 ## 4. Quality Scoring Model
 ### 4.1 Levels
@@ -187,10 +187,8 @@ Weaknesses:
 
 ## 8. Residual Deltas and Engineering Notes
 Accepted web-platform deltas:
-- native GTK popup/window semantics replaced by semantic web overlays/dialogs,
-- some abstract GTK classes are represented through semantic proxies,
-- renderer-specific behavior exists for native HTML controls (`<select>`),
-- geometry and animation are intentionally simplified where GTK-native behavior is not portable.
+- only hard web/Tauri platform limits are accepted,
+- each delta must include rationale, affected widgets/windowing scopes, and mitigation notes.
 
 Known limitations are implementation decisions, not undocumented gaps.
 

@@ -2,6 +2,8 @@
 
 Venner is a framework for building native-feeling desktop apps with web technologies.
 It combines a Rust/Tauri core, framework-agnostic widget primitives (Zag.js), and theme extraction from GTK into CSS tokens (`--venner-*`).
+Default window chrome policy in Venner is system GTK emulation (`chromeStyle: "system-gtk"`); debug-transparent chrome is opt-in.
+Theme engine v2 exposes a compiled GTK contract (tokens + window + widget sections) for higher-fidelity runtime styling.
 
 ## Project Status
 
