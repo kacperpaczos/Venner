@@ -179,3 +179,26 @@ export const startThemeViewers = async (techs: ViewerTech[]) => {
 		await sendViewerCommand(viewer.id, { method: "get_theme_diagnostics" });
 	}
 };
+
+const WINDOW_RUNNER_PREVIEW_ID = "window-runner-preview";
+
+export const startWindowRunnerPreview = async () => {
+	try {
+		await stopViewer(WINDOW_RUNNER_PREVIEW_ID);
+	} catch {
+		// no-op: preview might not be running
+	}
+
+	await invoke<ViewerRuntimeStatus>("viewer_spawn", {
+		viewerId: WINDOW_RUNNER_PREVIEW_ID,
+		command: "bash",
+		args: ["-lc", "bun run dev"],
+		cwd: "apps/window-runner",
+	});
+};
+
+export const stopWindowRunnerPreview = async () => {
+	await stopViewer(WINDOW_RUNNER_PREVIEW_ID);
+};
+
+export const getWindowRunnerPreviewId = () => WINDOW_RUNNER_PREVIEW_ID;

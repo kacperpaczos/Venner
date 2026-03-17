@@ -1,0 +1,14 @@
+.venner-page {
+	opacity: 0;
+	transition: opacity var(--venner-transition-medium, 300ms) ease;
+}
+
+.venner-page[data-visible="true"] {
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.venner-page {
+		transition: none;
+	}
+}

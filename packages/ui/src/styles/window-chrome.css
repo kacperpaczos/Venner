@@ -1,0 +1,141 @@
+.venner-window-chrome {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: stretch;
+	gap: 8px;
+	padding: 0;
+	border-bottom: 0 solid transparent;
+	background: transparent;
+	color: var(--venner-titlebar-fg, var(--venner-fg, #222));
+}
+
+.venner-window-chrome[data-variant="debug-transparent"] {
+	background: color-mix(in srgb, #ff3ea5 34%, transparent);
+	border-bottom-color: color-mix(in srgb, #ff3ea5 58%, var(--venner-border, #c5c9d3) 42%);
+}
+
+.venner-window-chrome.is-backdrop {
+	opacity: 0.92;
+}
+
+.venner-window-drag-region {
+	all: unset;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	padding: 2px 4px;
+	cursor: move;
+	min-height: 28px;
+}
+
+.venner-window-slot {
+	display: flex;
+	align-items: center;
+}
+
+.venner-window-slot.end {
+	justify-content: flex-end;
+}
+
+.venner-window-title-wrap {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	line-height: 1.25;
+}
+
+.venner-window-title-wrap small {
+	opacity: 0.75;
+}
+
+.venner-window-controls {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.venner-window-btn {
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.venner-window-btn.icon {
+	min-width: 28px;
+	min-height: 28px;
+}
+
+.venner-window-btn__icon-carrier {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	min-height: 20px;
+	border-radius: 9999px;
+	background: transparent;
+}
+
+.venner-window-btn__icon {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	background-color: currentColor;
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: contain;
+	-webkit-mask-position: center;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: contain;
+}
+
+.venner-window-btn[data-role="minimize"] .venner-window-btn__icon.fallback-minus {
+	mask-image: linear-gradient(#000, #000);
+	mask-size: 10px 1.5px;
+	-webkit-mask-image: linear-gradient(#000, #000);
+	-webkit-mask-size: 10px 1.5px;
+}
+
+.venner-window-btn[data-role="maximize"] .venner-window-btn__icon.fallback-maximize {
+	mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000);
+	mask-size: 1.5px 10px, 1.5px 10px, 10px 1.5px, 10px 1.5px;
+	mask-position: 2px center, calc(100% - 2px) center, center 2px, center calc(100% - 2px);
+	-webkit-mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000);
+	-webkit-mask-size: 1.5px 10px, 1.5px 10px, 10px 1.5px, 10px 1.5px;
+	-webkit-mask-position: 2px center, calc(100% - 2px) center, center 2px, center calc(100% - 2px);
+}
+
+.venner-window-btn[data-role="maximize"] .venner-window-btn__icon.fallback-restore {
+	mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000);
+	mask-size: 1.5px 7px, 1.5px 7px, 7px 1.5px, 7px 1.5px, 1.5px 7px, 1.5px 7px, 7px 1.5px, 7px 1.5px;
+	mask-position: 3px 8px, 9px 8px, 6px 5px, 6px 11px, 5px 5px, 11px 5px, 8px 2px, 8px 8px;
+	-webkit-mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000), linear-gradient(#000, #000);
+	-webkit-mask-size: 1.5px 7px, 1.5px 7px, 7px 1.5px, 7px 1.5px, 1.5px 7px, 1.5px 7px, 7px 1.5px, 7px 1.5px;
+	-webkit-mask-position: 3px 8px, 9px 8px, 6px 5px, 6px 11px, 5px 5px, 11px 5px, 8px 2px, 8px 8px;
+}
+
+.venner-window-btn[data-role="close"] .venner-window-btn__icon.fallback-close {
+	mask-image: linear-gradient(45deg, transparent 44%, #000 44%, #000 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, #000 44%, #000 56%, transparent 56%);
+	mask-size: 10px 10px, 10px 10px;
+	mask-position: center, center;
+	-webkit-mask-image: linear-gradient(45deg, transparent 44%, #000 44%, #000 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, #000 44%, #000 56%, transparent 56%);
+	-webkit-mask-size: 10px 10px, 10px 10px;
+	-webkit-mask-position: center, center;
+}
+
+.venner-window-btn:focus-visible,
+.venner-window-drag-region:focus-visible {
+	outline: 2px solid var(--venner-accent, #3584e4);
+	outline-offset: 1px;
+}
+
+.venner-window-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}

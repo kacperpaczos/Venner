@@ -39,16 +39,16 @@ export const pluginLog = {
 export const themeLog = {
 	loaded: async (diagnostics: ThemeDiagnostics) =>
 		termLog.info(
-			`[theme] source=${diagnostics.source} theme=${diagnostics.gtk_theme} scheme=${diagnostics.color_scheme} path=${diagnostics.resolved_css_path ?? "<none>"} gtk=${diagnostics.resolved_gtk_version} tokens=${diagnostics.tokens_count}`,
+			`[theme] source=${diagnostics.source} theme=${diagnostics.gtkTheme} scheme=${diagnostics.colorScheme} path=${diagnostics.resolvedCssPath ?? "<none>"} gtk=${diagnostics.resolvedGtkVersion} tokens=${diagnostics.tokensCount}`,
 		),
 	fallback: async (diagnostics: ThemeDiagnostics) => {
-		if (!diagnostics.fallback_reason) return;
+		if (!diagnostics.fallbackReason) return;
 		await termLog.warn(
-			`[theme] fallback source=${diagnostics.source} reason=${diagnostics.fallback_reason}`,
+			`[theme] fallback source=${diagnostics.source} reason=${diagnostics.fallbackReason}`,
 		);
 	},
 	changed: async (diagnostics: ThemeDiagnostics) =>
 		termLog.info(
-			`[theme] changed source=${diagnostics.source} path=${diagnostics.resolved_css_path ?? "<none>"} tokens=${diagnostics.tokens_count}`,
+			`[theme] changed source=${diagnostics.source} path=${diagnostics.resolvedCssPath ?? "<none>"} tokens=${diagnostics.tokensCount}`,
 		),
 };

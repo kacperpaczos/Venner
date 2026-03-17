@@ -10,7 +10,8 @@
 	],
 	"scripts": {
 		"build": "turbo run build",
-		"dev": "turbo run dev",
+		"dev": "turbo run dev --filter=@venner/dev",
+		"dev:window-runner": "turbo run dev --filter=@venner/window-runner",
 		"dev:app": "cd apps/dev && bunx tauri dev",
 		"lint": "turbo run lint",
 		"test": "bun test",

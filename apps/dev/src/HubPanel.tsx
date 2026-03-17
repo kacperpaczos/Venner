@@ -1,14 +1,19 @@
+import { createWindowGraph, windowController, type WindowBehaviorProfile, type WindowRuntimeState } from "@venner/core";
+import { ApplicationWindow } from "@venner/solid";
 import type { ThemeDiagnostics } from "@venner/themes-gnome";
 import { For, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import {
 	HUB_VIEWERS,
+	getWindowRunnerPreviewId,
 	getViewer,
 	listViewerStatus,
 	loadViewerManifest,
 	loadGtkReferenceSummary,
 	pollViewerLogs,
+	startWindowRunnerPreview,
 	startThemeViewers,
 	startWidgetViewersWithPreset,
+	stopWindowRunnerPreview,
 	stopViewer,
 	type GtkReferenceSummary,
 	type ViewerLogEvent,
@@ -21,7 +26,7 @@ interface HubPanelProps {
 	vennerDiagnostics: ThemeDiagnostics | null;
 }
 
-type SidebarSection = "widgets" | "themes";
+type SidebarSection = "widgets" | "themes" | "window";
 
 type WidgetManifest = {
 	groups?: { id: string; label: string; widgets: { id: string; label: string; states?: string[] }[] }[];
@@ -41,6 +46,18 @@ type ThemeRuntimeInfo = {
 };
 
 const TECHS: ViewerTech[] = ["gtk4", "adw", "venner"];
+const WINDOW_ID = "main";
+
+const DEFAULT_WINDOW_PROFILE: WindowBehaviorProfile = {
+	id: "default",
+	nativeDecorations: false,
+	chromeStyle: "system-gtk",
+	resizable: true,
+	allowMinimize: true,
+	allowMaximize: true,
+	allowFullscreen: true,
+	themeMode: "system-follow",
+};
 
 export function HubPanel(props: HubPanelProps) {
 	const [section, setSection] = createSignal<SidebarSection>("widgets");
@@ -67,6 +84,16 @@ export function HubPanel(props: HubPanelProps) {
 	const [selectedWidgetId, setSelectedWidgetId] = createSignal("button.default");
 	const [selectedGroupId, setSelectedGroupId] = createSignal("button");
 	const [selectedState, setSelectedState] = createSignal("default");
+
+	const [windowState, setWindowState] = createSignal<WindowRuntimeState | null>(null);
+	const [windowProfile, setWindowProfile] = createSignal<WindowBehaviorProfile>(DEFAULT_WINDOW_PROFILE);
+	const windowGraph = createWindowGraph({ activeWindowId: WINDOW_ID });
+	const [windowGraphTick, setWindowGraphTick] = createSignal(0);
+	const [transientParent, setTransientParent] = createSignal<string>("main");
+	const [modalWindowId, setModalWindowId] = createSignal<string>("dialog-1");
+	const [focusWidgetId, setFocusWidgetId] = createSignal<string>("entry.search");
+
+	const bumpWindowGraph = () => setWindowGraphTick((v) => v + 1);
 
 	const appendSystemLog = (line: string) => {
 		setLogs((prev) => [
@@ -108,6 +135,32 @@ export function HubPanel(props: HubPanelProps) {
 		if (polledLogs.length > 0) {
 			for (const entry of polledLogs) processThemeDiagnosticsLog(entry);
 			setLogs((prev) => [...prev, ...polledLogs].slice(-600));
+		}
+	};
+
+	const refreshWindowState = async () => {
+		try {
+			const next = await windowController.getState();
+			setWindowState(next);
+		} catch (error) {
+			appendSystemLog(`window_state_failed: ${String(error)}`);
+		}
+	};
+
+	const runWindowAction = async (label: string, fn: () => Promise<{ ok: boolean; error: string | null }>) => {
+		setBusy(true);
+		try {
+			const result = await fn();
+			if (!result.ok) {
+				appendSystemLog(`${label}_failed: ${result.error ?? "unknown"}`);
+			} else {
+				appendSystemLog(`${label}_ok`);
+			}
+			await refreshWindowState();
+		} catch (error) {
+			appendSystemLog(`${label}_failed: ${String(error)}`);
+		} finally {
+			setBusy(false);
 		}
 	};
 
@@ -179,6 +232,65 @@ export function HubPanel(props: HubPanelProps) {
 			widgets: `L3 ${c.l3}/${c.totalRows} (L2:${c.l2} L1:${c.l1} N/A:${c.na})`,
 			themes: `GTK ${summary.baseline.gtkVersion} @ ${summary.baseline.gtkSourceTag}`,
 		};
+	});
+
+	const windowBadge = createMemo(() => {
+		const state = windowState();
+		if (!state) return "state unavailable";
+		return `${state.nativeDecorations ? "native-decorated" : "custom-decorated"} / ${state.maximized ? "max" : "normal"}`;
+	});
+
+	const windowRunnerStatus = createMemo(() => {
+		const previewId = getWindowRunnerPreviewId();
+		const status = statuses().find((entry) => entry.viewerId === previewId);
+		return {
+			viewerId: previewId,
+			running: Boolean(status?.running),
+			pid: status?.pid ?? null,
+		};
+	});
+
+	const themeManifestByTech = (tech: ViewerTech) => {
+		switch (tech) {
+			case "gtk4":
+				return themeManifestGtk4();
+			case "adw":
+				return themeManifestAdw();
+			default:
+				return themeManifestVenner();
+		}
+	};
+
+	const themeCardData = createMemo(() => {
+		const runtime = themeRuntime();
+		const runningById = new Set(statuses().filter((status) => status.running).map((status) => status.viewerId));
+		return TECHS.map((tech) => {
+			const viewer = getViewer("theme", tech);
+			const running = viewer ? runningById.has(viewer.id) : false;
+			const runtimeInfo = runtime[tech];
+			const manifest = themeManifestByTech(tech);
+			const tokens = tech === "venner"
+				? Object.entries(props.vennerTokens).map(([name, value]) => ({ name, value }))
+				: (manifest.tokens ?? []);
+			const previewTokens = tokens.slice(0, 10);
+			const palette = manifest.palette ?? [];
+			return {
+				tech,
+				running,
+				source: runtimeInfo?.source ?? "manifest-fallback",
+				themeName: runtimeInfo?.themeName ?? (tech === "venner" ? (props.vennerDiagnostics?.gtkTheme ?? "venner") : tech),
+				tokensCount: runtimeInfo?.tokensCount ?? (tech === "venner" ? Object.keys(props.vennerTokens).length : tokens.length),
+				paletteName: runtimeInfo?.paletteName ?? "default",
+				updatedAt: runtimeInfo?.updatedAt,
+				palette,
+				previewTokens,
+			};
+		});
+	});
+
+	const windowGraphState = createMemo(() => {
+		windowGraphTick();
+		return windowGraph.getState();
 	});
 
 	const startWidgets = async () => {
@@ -274,43 +386,31 @@ export function HubPanel(props: HubPanelProps) {
 		}
 	};
 
-	const themeManifestByTech = (tech: ViewerTech) => {
-		switch (tech) {
-			case "gtk4":
-				return themeManifestGtk4();
-			case "adw":
-				return themeManifestAdw();
-			default:
-				return themeManifestVenner();
+	const startWindowPreview = async () => {
+		setBusy(true);
+		try {
+			await startWindowRunnerPreview();
+			appendSystemLog("window_runner_preview_started");
+			await refreshRuntime();
+		} catch (error) {
+			appendSystemLog(`window_runner_preview_start_failed: ${String(error)}`);
+		} finally {
+			setBusy(false);
 		}
 	};
 
-	const themeCardData = createMemo(() => {
-		const runtime = themeRuntime();
-		const runningById = new Set(statuses().filter((status) => status.running).map((status) => status.viewerId));
-		return TECHS.map((tech) => {
-			const viewer = getViewer("theme", tech);
-			const running = viewer ? runningById.has(viewer.id) : false;
-			const runtimeInfo = runtime[tech];
-			const manifest = themeManifestByTech(tech);
-			const tokens = tech === "venner"
-				? Object.entries(props.vennerTokens).map(([name, value]) => ({ name, value }))
-				: (manifest.tokens ?? []);
-			const previewTokens = tokens.slice(0, 10);
-			const palette = manifest.palette ?? [];
-			return {
-				tech,
-				running,
-				source: runtimeInfo?.source ?? "manifest-fallback",
-				themeName: runtimeInfo?.themeName ?? (tech === "venner" ? (props.vennerDiagnostics?.gtk_theme ?? "venner") : tech),
-				tokensCount: runtimeInfo?.tokensCount ?? (tech === "venner" ? Object.keys(props.vennerTokens).length : tokens.length),
-				paletteName: runtimeInfo?.paletteName ?? "default",
-				updatedAt: runtimeInfo?.updatedAt,
-				palette,
-				previewTokens,
-			};
-		});
-	});
+	const stopWindowPreview = async () => {
+		setBusy(true);
+		try {
+			await stopWindowRunnerPreview();
+			appendSystemLog("window_runner_preview_stopped");
+			await refreshRuntime();
+		} catch (error) {
+			appendSystemLog(`window_runner_preview_stop_failed: ${String(error)}`);
+		} finally {
+			setBusy(false);
+		}
+	};
 
 	onMount(async () => {
 		const [wGtk4, wAdw, wVenner, tGtk4, tAdw, tVenner, summary] = await Promise.all([
@@ -338,8 +438,10 @@ export function HubPanel(props: HubPanelProps) {
 		}
 
 		await refreshRuntime();
+		await refreshWindowState();
 		const timer = setInterval(() => {
 			refreshRuntime();
+			refreshWindowState();
 		}, 1200);
 		onCleanup(() => clearInterval(timer));
 	});
@@ -366,6 +468,15 @@ export function HubPanel(props: HubPanelProps) {
 					<small>{themeBadgeSummary().activeSources} active / {themeBadgeSummary().lastUpdate}</small>
 					<small>{coverageBadge().themes}</small>
 				</button>
+				<button
+					type="button"
+					class={`dev-nav-btn ${section() === "window" ? "active" : ""}`}
+					onClick={() => setSection("window")}
+				>
+					<span>Window</span>
+					<small>{windowBadge()}</small>
+					<small>framework mode</small>
+				</button>
 				<button type="button" class="dev-nav-btn" disabled>
 					<span>Inne</span>
 					<small>wkrotce</small>
@@ -389,7 +500,7 @@ export function HubPanel(props: HubPanelProps) {
 							<button type="button" class="dev-btn secondary" onClick={stopWidgets} disabled={busy()}>Stop</button>
 						</div>
 					</section>
-				) : (
+				) : section() === "themes" ? (
 					<section class="dev-card">
 						<h3>Motywy</h3>
 						<div class="dev-check-row">
@@ -431,6 +542,122 @@ export function HubPanel(props: HubPanelProps) {
 								)}
 							</For>
 						</div>
+					</section>
+				) : (
+					<section class="dev-card window-panel">
+						<h3>Window Framework</h3>
+						<div class="window-runtime-grid">
+							<div>label: {windowState()?.label ?? "-"}</div>
+							<div>native decorations: {String(windowState()?.nativeDecorations ?? false)}</div>
+							<div>resizable: {String(windowState()?.resizable ?? false)}</div>
+							<div>maximized: {String(windowState()?.maximized ?? false)}</div>
+							<div>minimized: {String(windowState()?.minimized ?? false)}</div>
+							<div>fullscreen: {String(windowState()?.fullscreen ?? false)}</div>
+							<div>focused: {String(windowState()?.focused ?? false)}</div>
+							<div>visible: {String(windowState()?.visible ?? false)}</div>
+							<div>x/y: {windowState()?.x ?? "-"} / {windowState()?.y ?? "-"}</div>
+							<div>w/h: {windowState()?.width ?? "-"} / {windowState()?.height ?? "-"}</div>
+						</div>
+
+						<div class="window-profile-grid">
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().nativeDecorations}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, nativeDecorations: e.currentTarget.checked }))}
+								/>
+								Native decorations
+							</label>
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().resizable}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, resizable: e.currentTarget.checked }))}
+								/>
+								Resizable
+							</label>
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().allowMinimize}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, allowMinimize: e.currentTarget.checked }))}
+								/>
+								Allow Minimize
+							</label>
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().allowMaximize}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, allowMaximize: e.currentTarget.checked }))}
+								/>
+								Allow Maximize
+							</label>
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().allowFullscreen}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, allowFullscreen: e.currentTarget.checked }))}
+								/>
+								Allow Fullscreen
+							</label>
+							<label>
+								<input
+									type="checkbox"
+									checked={windowProfile().chromeStyle === "debug-transparent"}
+									onInput={(e) => setWindowProfile((prev) => ({ ...prev, chromeStyle: e.currentTarget.checked ? "debug-transparent" : "system-gtk" }))}
+								/>
+								Debug chrome style
+							</label>
+						</div>
+
+						<div class="window-actions">
+							<button type="button" class="dev-btn" disabled={busy()} onClick={startWindowPreview}>Start window viewer preview</button>
+							<button type="button" class="dev-btn secondary" disabled={busy()} onClick={stopWindowPreview}>Stop window viewer preview</button>
+							<div>preview status: {windowRunnerStatus().running ? "running" : "stopped"} / pid: {windowRunnerStatus().pid ?? "-"}</div>
+							<button type="button" class="dev-btn" disabled={busy()} onClick={() => runWindowAction("window_apply_profile", () => windowController.applyProfile(windowProfile()))}>Apply profile</button>
+							<button type="button" class="dev-btn" disabled={busy()} onClick={() => runWindowAction("window_present", () => windowController.present())}>Present</button>
+							<button type="button" class="dev-btn" disabled={busy()} onClick={() => runWindowAction("window_toggle_native_decorations", () => windowController.setNativeDecorations(!(windowState()?.nativeDecorations ?? true)))}>Toggle native decorations</button>
+							<button type="button" class="dev-btn" disabled={busy()} onClick={() => runWindowAction("window_toggle_resizable", () => windowController.setResizable(!(windowState()?.resizable ?? true)))}>Toggle resizable</button>
+							<button type="button" class="dev-btn" disabled={busy() || !windowProfile().allowMinimize} onClick={() => runWindowAction("window_minimize", () => windowController.minimize())}>Minimize</button>
+							<button type="button" class="dev-btn" disabled={busy() || !windowProfile().allowMaximize} onClick={() => runWindowAction("window_toggle_maximize", () => windowController.toggleMaximize())}>{windowState()?.maximized ? "Restore" : "Maximize"}</button>
+							<button type="button" class="dev-btn" disabled={busy() || !windowProfile().allowFullscreen} onClick={() => runWindowAction("window_toggle_fullscreen", () => windowController.setFullscreen(!(windowState()?.fullscreen ?? false)))}>{windowState()?.fullscreen ? "Exit fullscreen" : "Fullscreen"}</button>
+							<button type="button" class="dev-btn" disabled={busy()} onClick={() => runWindowAction("window_start_dragging", () => windowController.startDragging())}>Start dragging</button>
+							<button type="button" class="dev-btn secondary" disabled={busy()} onClick={() => runWindowAction("window_close_request", () => windowController.closeRequest())}>Close request</button>
+						</div>
+
+						<div class="window-graph-grid">
+							<div>activeWindowId: {windowGraphState().activeWindowId ?? "-"}</div>
+							<div>modalStack: {windowGraphState().modalStack.join(", ") || "-"}</div>
+							<div>focusOwner(main): {windowGraphState().focusOwners.main ?? "-"}</div>
+							<div>blocked(main): {String(windowGraph.blockedByModal("main"))}</div>
+							<div class="dev-action-row">
+								<input class="dev-select" value={modalWindowId()} onInput={(e) => setModalWindowId(e.currentTarget.value)} />
+								<button type="button" class="dev-btn" onClick={() => { windowGraph.pushModal(modalWindowId()); bumpWindowGraph(); }}>Push modal</button>
+								<button type="button" class="dev-btn secondary" onClick={() => { windowGraph.popModal(modalWindowId()); bumpWindowGraph(); }}>Pop modal</button>
+							</div>
+							<div class="dev-action-row">
+								<input class="dev-select" value={transientParent()} onInput={(e) => setTransientParent(e.currentTarget.value)} />
+								<button type="button" class="dev-btn" onClick={() => { windowGraph.setTransientFor(modalWindowId(), transientParent() || null); bumpWindowGraph(); }}>Set transient</button>
+							</div>
+							<div class="dev-action-row">
+								<input class="dev-select" value={focusWidgetId()} onInput={(e) => setFocusWidgetId(e.currentTarget.value)} />
+								<button type="button" class="dev-btn" onClick={() => { windowGraph.setFocusOwner("main", focusWidgetId() || null); bumpWindowGraph(); }}>Set focus owner</button>
+							</div>
+						</div>
+
+						<ApplicationWindow
+							title="Venner Window"
+							subtitle="Custom chrome preview"
+							chromeMode="custom"
+							profile={windowProfile()}
+							runtimeState={windowState()}
+							onMinimize={() => runWindowAction("window_minimize", () => windowController.minimize())}
+							onToggleMaximize={() => runWindowAction("window_toggle_maximize", () => windowController.toggleMaximize())}
+							onCloseRequest={() => runWindowAction("window_close_request", () => windowController.closeRequest())}
+							onStartDragging={() => runWindowAction("window_start_dragging", () => windowController.startDragging())}
+						>
+							<div>Theme source: system-follow. Runtime state and controls are bound to the current Tauri window.</div>
+						</ApplicationWindow>
 					</section>
 				)}
 

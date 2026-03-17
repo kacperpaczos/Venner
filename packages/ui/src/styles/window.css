@@ -1,0 +1,19 @@
+.venner-window {
+	opacity: 0;
+	transform: translateY(4px);
+	transition:
+		opacity var(--venner-transition-medium, 300ms) ease,
+		transform var(--venner-transition-medium, 300ms) ease;
+}
+
+.venner-window[data-visible="true"] {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.venner-window {
+		transition: none;
+		transform: none;
+	}
+}
