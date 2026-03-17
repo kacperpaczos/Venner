@@ -2,8 +2,11 @@
 
 use super::parser_gtk3;
 use super::parser_gtk4;
+use super::parser_gtk4_widgets;
+use super::parser_gtk4_window;
 use super::path;
 use super::resolver::{self, ColorScheme, ThemeGtkVersion};
+use crate::theme::compiled_theme::{build_meta, CompiledGtkTheme};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
@@ -12,7 +15,22 @@ use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
 
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ThemeCoverageWindow {
+    pub headerbar: f32,
+    pub windowcontrols: f32,
+    pub title_buttons: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ThemeCoverage {
+    pub window: ThemeCoverageWindow,
+}
+
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ThemeDiagnostics {
     pub desktop_env: String,
     pub schema: String,
@@ -24,6 +42,20 @@ pub struct ThemeDiagnostics {
     pub fallback_reason: Option<String>,
     pub tokens_count: usize,
     pub loaded_at: u64,
+    pub coverage: ThemeCoverage,
+    pub missing_selectors: Vec<String>,
+    pub missing_props: Vec<String>,
+}
+
+impl ThemeDiagnostics {
+    fn with_empty_coverage(self) -> Self {
+        Self {
+            coverage: ThemeCoverage::default(),
+            missing_selectors: Vec::new(),
+            missing_props: Vec::new(),
+            ..self
+        }
+    }
 }
 
 /// Load current theme tokens and diagnostics: system -> project fallback -> defaults.
@@ -49,6 +81,9 @@ pub fn load_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnosti
                         fallback_reason: None,
                         tokens_count: tokens.len(),
                         loaded_at: now,
+                        coverage: ThemeCoverage::default(),
+                        missing_selectors: Vec::new(),
+                        missing_props: Vec::new(),
                     };
                     log::info!(
                         "[theme] source=system theme={} scheme={} path={} gtk={} tokens={}",
@@ -110,6 +145,9 @@ fn try_project_or_default(
                             fallback_reason,
                             tokens_count: tokens.len(),
                             loaded_at: now,
+                            coverage: ThemeCoverage::default(),
+                            missing_selectors: Vec::new(),
+                            missing_props: Vec::new(),
                         };
                         log::warn!(
                             "[theme] source=project_fallback theme={} scheme={} path={} gtk={} tokens={} reason={}",
@@ -156,6 +194,9 @@ fn try_project_or_default(
         fallback_reason,
         tokens_count: tokens.len(),
         loaded_at: now,
+        coverage: ThemeCoverage::default(),
+        missing_selectors: Vec::new(),
+        missing_props: Vec::new(),
     };
 
     log::warn!(
@@ -175,6 +216,76 @@ fn try_project_or_default(
 /// Backward-compatible helper returning only tokens.
 pub fn load_theme_tokens() -> HashMap<String, String> {
     load_theme_with_diagnostics().0
+}
+
+/// Load compiled theme contract (tokens + window/widgets sections) and diagnostics.
+pub fn load_compiled_theme_with_diagnostics() -> (CompiledGtkTheme, ThemeDiagnostics) {
+    let (tokens, diagnostics) = load_theme_with_diagnostics();
+    let version = match diagnostics.resolved_gtk_version.as_str() {
+        "gtk4" => ThemeGtkVersion::Gtk4,
+        "gtk3" => ThemeGtkVersion::Gtk3,
+        _ => ThemeGtkVersion::Unknown,
+    };
+
+    let (window, widgets, hash_input, parse_report) = if version == ThemeGtkVersion::Gtk4 {
+        if let Some(path) = diagnostics.resolved_css_path.as_ref() {
+            if let Ok(css) = std::fs::read_to_string(path) {
+                let (window, report) = parser_gtk4_window::parse_gtk4_window_css_with_report(&css);
+                (
+                    window,
+                    parser_gtk4_widgets::parse_gtk4_widgets_css(&css),
+                    css,
+                    Some(report),
+                )
+            } else {
+                (
+                    Default::default(),
+                    Default::default(),
+                    format!("{:?}{:?}", tokens, diagnostics.resolved_css_path),
+                    None,
+                )
+            }
+        } else {
+            (
+                Default::default(),
+                Default::default(),
+                format!("{:?}{:?}", tokens, diagnostics.source),
+                None,
+            )
+        }
+    } else {
+        (
+            Default::default(),
+            Default::default(),
+            format!("{:?}{:?}", tokens, diagnostics.source),
+            None,
+        )
+    };
+
+    let diagnostics = if let Some(report) = parse_report {
+        ThemeDiagnostics {
+            coverage: ThemeCoverage {
+                window: ThemeCoverageWindow {
+                    headerbar: report.headerbar_coverage,
+                    windowcontrols: report.windowcontrols_coverage,
+                    title_buttons: report.titlebuttons_coverage,
+                },
+            },
+            missing_selectors: report.missing_selectors,
+            missing_props: report.missing_props,
+            ..diagnostics
+        }
+    } else {
+        diagnostics.with_empty_coverage()
+    };
+
+    let compiled = CompiledGtkTheme {
+        tokens,
+        window,
+        widgets,
+        meta: build_meta(&diagnostics, version, &hash_input),
+    };
+    (compiled, diagnostics)
 }
 
 fn parse_tokens(css: &str, version: ThemeGtkVersion) -> HashMap<String, String> {
@@ -255,8 +366,9 @@ pub fn start_theme_monitor(app_handle: tauri::AppHandle) {
         for line in reader.lines().map_while(Result::ok) {
             let key = line.split(':').next().unwrap_or("").trim();
             if THEME_KEYS.contains(&key) {
-                let (tokens, diagnostics) = load_theme_with_diagnostics();
-                let _ = app_handle.emit("theme:changed", &tokens);
+                let (compiled, diagnostics) = load_compiled_theme_with_diagnostics();
+                let _ = app_handle.emit("theme:changed", &compiled.tokens);
+                let _ = app_handle.emit("theme:compiled-changed", &compiled);
                 let _ = app_handle.emit("theme:diagnostics", &diagnostics);
                 log::info!(
                     "[theme] changed key={} source={} path={} tokens={}",

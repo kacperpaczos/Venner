@@ -2,6 +2,7 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import type {
 	AboutDialogResult,
 	AppState,
+	CompiledGtkTheme,
 	ImportResult,
 	NativeDialogResult,
 	ThemeDiagnostics,
@@ -33,6 +34,10 @@ export const store = {
 	getGtkTheme: () => invoke<Record<string, string>>("get_gtk_theme"),
 	getGtkThemeDiagnostics: () =>
 		invoke<ThemeDiagnostics>("get_gtk_theme_diagnostics"),
+	getCompiledGtkTheme: () =>
+		invoke<CompiledGtkTheme>("get_compiled_gtk_theme"),
+	getCompiledGtkThemeDiagnostics: () =>
+		invoke<ThemeDiagnostics>("get_compiled_gtk_theme_diagnostics"),
 	openFileDialog: () => invoke<NativeDialogResult>("open_file_dialog"),
 	openColorDialog: () => invoke<NativeDialogResult>("open_color_dialog"),
 	openFontDialog: () => invoke<NativeDialogResult>("open_font_dialog"),

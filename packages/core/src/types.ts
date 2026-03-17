@@ -111,16 +111,148 @@ export interface AboutDialogResult {
 export type ThemeSource = "system" | "project" | "default";
 
 export interface ThemeDiagnostics {
-	desktop_env: string;
+	desktopEnv: string;
 	schema: string;
-	gtk_theme: string;
-	color_scheme: string;
+	gtkTheme: string;
+	colorScheme: string;
 	source: ThemeSource;
-	resolved_css_path: string | null;
-	resolved_gtk_version: string;
-	fallback_reason: string | null;
-	tokens_count: number;
-	loaded_at: number;
+	resolvedCssPath: string | null;
+	resolvedGtkVersion: string;
+	fallbackReason: string | null;
+	tokensCount: number;
+	loadedAt: number;
+	coverage: {
+		window: {
+			headerbar: number;
+			windowcontrols: number;
+			titleButtons: number;
+		};
+	};
+	missingSelectors: string[];
+	missingProps: string[];
+}
+
+export interface CompiledGtkTheme {
+	tokens: Record<string, string>;
+	window: CompiledWindowTheme;
+	widgets: CompiledWidgetsTheme;
+	meta: CompiledGtkThemeMeta;
+}
+
+export interface CompiledGtkThemeMeta {
+	gtkVersion: string;
+	sourcePath: string | null;
+	themeName: string;
+	colorScheme: string;
+	hash: string;
+	contractVersion: string;
+}
+
+export interface CompiledWindowTheme {
+	headerbar: {
+		minHeight?: string;
+		padding?: string;
+		borderColor?: string;
+		borderWidth?: string;
+		borderStyle?: string;
+		backgroundColor?: string;
+		backgroundImage?: string;
+		boxShadow?: string;
+		transition?: string;
+		titlePadding?: string;
+		subtitlePadding?: string;
+		subtitleFontSize?: string;
+	};
+	windowcontrols: {
+		spacing?: string;
+		marginStart?: string;
+		marginEnd?: string;
+		buttonMinWidth?: string;
+		buttonMinHeight?: string;
+		buttonPadding?: string;
+		buttonBorderColor?: string;
+		buttonBackgroundColor?: string;
+		buttonHoverBorderColor?: string;
+		buttonHoverBackgroundColor?: string;
+		buttonActiveBorderColor?: string;
+		buttonActiveBackgroundColor?: string;
+		buttonBorder?: string;
+		buttonBoxShadow?: string;
+		buttonBackgroundImage?: string;
+		iconCarrier: {
+			minWidth?: string;
+			minHeight?: string;
+			borderRadius?: string;
+			backgroundColor?: string;
+			backgroundImage?: string;
+			boxShadow?: string;
+			hoverBackgroundColor?: string;
+			activeBackgroundColor?: string;
+			disabledBackgroundColor?: string;
+		};
+	};
+	titleButtons: {
+		close: CompiledTitleButton;
+		maximize: CompiledTitleButton;
+		minimize: CompiledTitleButton;
+	};
+	backdrop: {
+		headerbarColor?: string;
+		closeBackgroundImage?: string;
+		maximizeColor?: string;
+		minimizeColor?: string;
+	};
+	layout: {
+		controlsSpacing?: string;
+		controlsMarginStart?: string;
+		controlsMarginEnd?: string;
+		endLastButtonPaddingRight?: string;
+	};
+}
+
+export interface CompiledTitleButton {
+	color?: string;
+	hoverColor?: string;
+	activeColor?: string;
+	backgroundImage?: string;
+	hoverBackgroundImage?: string;
+	activeBackgroundImage?: string;
+	icon: {
+		symbolicName?: string;
+		resolvedSource?: "system-icon" | "css-image" | "fallback-svg";
+		resolvedCssMask?: string;
+		resolvedUrl?: string;
+	};
+}
+
+export interface CompiledWidgetsTheme {
+	button: {
+		minHeight?: string;
+		minWidth?: string;
+		padding?: string;
+		borderRadius?: string;
+		borderColor?: string;
+		backgroundColor?: string;
+		color?: string;
+		hoverBorderColor?: string;
+		hoverBackgroundColor?: string;
+		activeBorderColor?: string;
+		activeBackgroundColor?: string;
+		disabledColor?: string;
+		disabledBorderColor?: string;
+		disabledBackgroundColor?: string;
+	};
+	entry: {
+		minHeight?: string;
+		padding?: string;
+		borderRadius?: string;
+		borderColor?: string;
+		backgroundColor?: string;
+		color?: string;
+		focusBorderColor?: string;
+		disabledColor?: string;
+		disabledBackgroundColor?: string;
+	};
 }
 
 export type Action =

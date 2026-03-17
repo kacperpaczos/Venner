@@ -1,18 +1,28 @@
 /**
  * Load GNOME/GTK theme tokens from Rust backend (get_gtk_theme command).
  */
+import type { CompiledGtkTheme } from "@venner/core";
 
 export interface ThemeDiagnostics {
-	desktop_env: string;
+	desktopEnv: string;
 	schema: string;
-	gtk_theme: string;
-	color_scheme: string;
+	gtkTheme: string;
+	colorScheme: string;
 	source: "system" | "project" | "default";
-	resolved_css_path: string | null;
-	resolved_gtk_version: string;
-	fallback_reason: string | null;
-	tokens_count: number;
-	loaded_at: number;
+	resolvedCssPath: string | null;
+	resolvedGtkVersion: string;
+	fallbackReason: string | null;
+	tokensCount: number;
+	loadedAt: number;
+	coverage: {
+		window: {
+			headerbar: number;
+			windowcontrols: number;
+			titleButtons: number;
+		};
+	};
+	missingSelectors: string[];
+	missingProps: string[];
 }
 
 export interface GnomeThemeConfig {
@@ -42,6 +52,18 @@ export async function getThemeTokens(): Promise<Record<string, string>> {
 export async function getThemeDiagnostics(): Promise<ThemeDiagnostics> {
 	const { invoke } = await import("@venner/core");
 	return invoke<ThemeDiagnostics>("get_gtk_theme_diagnostics");
+}
+
+/** Fetch compiled GTK theme contract (tokens + window + widgets). */
+export async function getCompiledTheme(): Promise<CompiledGtkTheme> {
+	const { invoke } = await import("@venner/core");
+	return invoke<CompiledGtkTheme>("get_compiled_gtk_theme");
+}
+
+/** Fetch diagnostics for compiled GTK theme contract. */
+export async function getCompiledThemeDiagnostics(): Promise<ThemeDiagnostics> {
+	const { invoke } = await import("@venner/core");
+	return invoke<ThemeDiagnostics>("get_compiled_gtk_theme_diagnostics");
 }
 
 /** Build legacy config from tokens for compatibility. */

@@ -55,3 +55,15 @@ pub fn get_gtk_theme() -> Result<HashMap<String, String>, String> {
 pub fn get_gtk_theme_diagnostics() -> Result<monitor::ThemeDiagnostics, String> {
     Ok(monitor::load_theme_with_diagnostics().1)
 }
+
+/// Return compiled GTK theme contract (tokens + window + widgets).
+#[tauri::command]
+pub fn get_compiled_gtk_theme() -> Result<crate::theme::compiled_theme::CompiledGtkTheme, String> {
+    Ok(monitor::load_compiled_theme_with_diagnostics().0)
+}
+
+/// Return diagnostics for compiled GTK theme loading.
+#[tauri::command]
+pub fn get_compiled_gtk_theme_diagnostics() -> Result<monitor::ThemeDiagnostics, String> {
+    Ok(monitor::load_compiled_theme_with_diagnostics().1)
+}

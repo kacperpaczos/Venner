@@ -1,5 +1,5 @@
 import { listen as tauriListen } from "@tauri-apps/api/event";
-import type { AppState, ThemeDiagnostics } from "../types";
+import type { AppState, CompiledGtkTheme, ThemeDiagnostics } from "../types";
 
 /**
  * Listen to Tauri events with type-safe payload
@@ -25,6 +25,9 @@ export const events = {
 
 	onThemeChange: (handler: (tokens: Record<string, string>) => void) =>
 		listen<Record<string, string>>("theme:changed", handler),
+
+	onCompiledThemeChange: (handler: (theme: CompiledGtkTheme) => void) =>
+		listen<CompiledGtkTheme>("theme:compiled-changed", handler),
 
 	onThemeDiagnostics: (handler: (diagnostics: ThemeDiagnostics) => void) =>
 		listen<ThemeDiagnostics>("theme:diagnostics", handler),
