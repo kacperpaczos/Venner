@@ -11,4 +11,6 @@
 	height: 100%;
 	background: var(--venner-accent);
 	transition: width 180ms ease;
+	will-change: width;
+	transform: translateZ(0);
 }

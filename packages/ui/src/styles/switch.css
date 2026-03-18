@@ -10,6 +10,7 @@
 	background: var(--venner-switch-bg, #2a2a2a);
 	transition: background 140ms ease;
 	cursor: pointer;
+	touch-action: manipulation;
 }
 
 .venner-switch[data-checked="true"] {
@@ -31,6 +32,7 @@
 	background: var(--venner-switch-thumb-bg, #d9d9d9);
 	transition: background 140ms ease;
 	flex: 0 0 auto;
+	will-change: background;
 }
 
 .venner-switch[data-checked="true"] .venner-switch-thumb {
