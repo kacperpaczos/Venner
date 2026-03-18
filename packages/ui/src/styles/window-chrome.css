@@ -7,6 +7,12 @@
 	border-bottom: 0 solid transparent;
 	background: transparent;
 	color: var(--venner-titlebar-fg, var(--venner-fg, #222));
+	will-change: transform, opacity;
+	transform: translateZ(0);
+	transition:
+		background-color var(--venner-transition-gtk, 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+		color var(--venner-transition-gtk, 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+		opacity var(--venner-transition-fast, 150ms ease);
 }
 
 .venner-window-chrome[data-variant="debug-transparent"] {
@@ -27,6 +33,7 @@
 	padding: 2px 4px;
 	cursor: move;
 	min-height: 28px;
+	touch-action: none;
 }
 
 .venner-window-slot {
@@ -65,6 +72,11 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	touch-action: manipulation;
+	transition:
+		color var(--venner-transition-fast, 150ms ease),
+		background-color var(--venner-transition-fast, 150ms ease),
+		opacity var(--venner-transition-fast, 150ms ease);
 }
 
 .venner-window-btn.icon {
@@ -80,6 +92,18 @@
 	min-height: 20px;
 	border-radius: 9999px;
 	background: transparent;
+	transition:
+		background-color var(--venner-transition-gtk, 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+		box-shadow var(--venner-transition-fast, 150ms ease),
+		transform var(--venner-transition-fast, 150ms ease);
+}
+
+.venner-window-btn.icon:hover:not(:disabled) .venner-window-btn__icon-carrier {
+	transform: scale(1.02);
+}
+
+.venner-window-btn.icon:active:not(:disabled) .venner-window-btn__icon-carrier {
+	transform: scale(0.96);
 }
 
 .venner-window-btn__icon {
@@ -138,4 +162,43 @@
 .venner-window-btn:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
+}
+
+.venner-window-context-menu {
+	position: fixed;
+	z-index: 2200;
+	display: flex;
+	flex-direction: column;
+	min-width: 176px;
+	padding: 6px;
+	border-radius: 10px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	background: color-mix(in srgb, var(--venner-bg, #fff) 94%, #000 6%);
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+	backdrop-filter: blur(6px);
+}
+
+.venner-window-context-menu button {
+	appearance: none;
+	border: none;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	padding: 6px 10px;
+	border-radius: 7px;
+	cursor: pointer;
+}
+
+.venner-window-context-menu button:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--venner-accent, #3584e4) 16%, transparent);
+}
+
+.venner-window-context-menu button:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.venner-window-context-menu button.danger:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--venner-error, #d73a49) 18%, transparent);
 }

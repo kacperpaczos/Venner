@@ -66,6 +66,11 @@ export function injectCompiledTheme(theme: CompiledGtkTheme): void {
 	const windowTheme = theme.window;
 	const widgets = theme.widgets;
 	const sections = [
+		cssRule(".venner-application-window", {
+			"border-color": windowTheme.headerbar.borderColor,
+			"background-color": windowTheme.headerbar.backgroundColor,
+			"box-shadow": windowTheme.headerbar.boxShadow,
+		}),
 		cssRule(".venner-window-chrome", {
 			"min-height": windowTheme.headerbar.minHeight,
 			padding: windowTheme.headerbar.padding,
@@ -127,7 +132,19 @@ export function injectCompiledTheme(theme: CompiledGtkTheme): void {
 		...buttonRoleRules("close", windowTheme.titleButtons.close),
 		...buttonRoleRules("maximize", windowTheme.titleButtons.maximize),
 		...buttonRoleRules("minimize", windowTheme.titleButtons.minimize),
+		cssRule('.venner-window-btn[data-role="close"]', {
+			"background-image": windowTheme.backdrop.closeBackgroundImage,
+		}),
 		cssRule(".venner-window-chrome[data-focused=\"false\"]", {
+			color: windowTheme.backdrop.headerbarColor,
+		}),
+		cssRule('.venner-window-chrome[data-focused="false"] .venner-window-btn[data-role="maximize"]', {
+			color: windowTheme.backdrop.maximizeColor,
+		}),
+		cssRule('.venner-window-chrome[data-focused="false"] .venner-window-btn[data-role="minimize"]', {
+			color: windowTheme.backdrop.minimizeColor,
+		}),
+		cssRule('.venner-application-window[data-focused="false"]', {
 			color: windowTheme.backdrop.headerbarColor,
 		}),
 		cssRule(".venner-button", {

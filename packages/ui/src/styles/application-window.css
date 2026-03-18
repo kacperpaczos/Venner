@@ -1,9 +1,41 @@
 .venner-application-window {
+	position: relative;
 	border: 1px solid var(--venner-border, #c5c9d3);
 	border-radius: 10px;
 	background: color-mix(in srgb, var(--venner-bg, #fff) 96%, #000 4%);
 	color: var(--venner-fg, #222);
 	overflow: hidden;
+	box-shadow: 0 8px 32px color-mix(in srgb, var(--venner-bg, #fff) 40%, #000 60%);
+	transform: translateZ(0);
+	will-change: transform, border-radius, box-shadow;
+	transition:
+		border-radius var(--venner-transition-gtk, 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+		box-shadow var(--venner-transition-gtk, 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+		border-color var(--venner-transition-fast, 150ms ease);
+}
+
+.venner-application-window[data-focused="false"] {
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
+}
+
+.venner-application-window[data-focused="true"] {
+	box-shadow:
+		0 4px 16px rgba(0, 0, 0, 0.2),
+		0 14px 34px rgba(0, 0, 0, 0.26);
+}
+
+.venner-application-window[data-maximized="true"],
+.venner-application-window[data-fullscreen="true"],
+.venner-application-window[data-tiled="left"],
+.venner-application-window[data-tiled="right"],
+.venner-application-window[data-tiled="top"],
+.venner-application-window[data-tiled="top-left"],
+.venner-application-window[data-tiled="top-right"],
+.venner-application-window[data-tiled="bottom-left"],
+.venner-application-window[data-tiled="bottom-right"] {
+	border-radius: 0;
+	box-shadow: none;
+	border-width: 0;
 }
 
 .venner-application-window-header {
@@ -37,4 +69,151 @@
 
 .venner-application-window-content {
 	padding: 12px;
+	transform-origin: 0 0;
+	will-change: transform;
+	transition: transform var(--venner-transition-medium, 250ms) ease;
+}
+
+.venner-window-zoom-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px;
+	border-radius: 999px;
+	border: 1px solid var(--venner-border, #c5c9d3);
+	background: color-mix(in srgb, var(--venner-bg, #fff) 94%, #000 6%);
+}
+
+.venner-window-zoom-indicator button {
+	appearance: none;
+	border: none;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	padding: 3px 7px;
+	border-radius: 999px;
+	cursor: pointer;
+	min-width: 30px;
+	touch-action: manipulation;
+}
+
+.venner-window-zoom-indicator button.value {
+	min-width: 52px;
+}
+
+.venner-window-zoom-indicator button:hover {
+	background: color-mix(in srgb, var(--venner-accent, #3584e4) 16%, transparent);
+}
+
+.venner-resize-handle {
+	position: absolute;
+	z-index: 25;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: transparent;
+	opacity: 0;
+	transition: opacity var(--venner-transition-fast, 150ms ease);
+	touch-action: none;
+}
+
+.venner-application-window:hover .venner-resize-handle {
+	opacity: 1;
+}
+
+.venner-resize-handle.n,
+.venner-resize-handle.s {
+	left: 10px;
+	right: 10px;
+	height: 8px;
+}
+
+.venner-resize-handle.n {
+	top: 0;
+	cursor: ns-resize;
+}
+
+.venner-resize-handle.s {
+	bottom: 0;
+	cursor: ns-resize;
+}
+
+.venner-resize-handle.e,
+.venner-resize-handle.w {
+	top: 10px;
+	bottom: 10px;
+	width: 8px;
+}
+
+.venner-resize-handle.e {
+	right: 0;
+	cursor: ew-resize;
+}
+
+.venner-resize-handle.w {
+	left: 0;
+	cursor: ew-resize;
+}
+
+.venner-resize-handle.ne,
+.venner-resize-handle.nw,
+.venner-resize-handle.se,
+.venner-resize-handle.sw {
+	width: 12px;
+	height: 12px;
+}
+
+.venner-resize-handle.ne {
+	top: 0;
+	right: 0;
+	cursor: nesw-resize;
+}
+
+.venner-resize-handle.nw {
+	top: 0;
+	left: 0;
+	cursor: nwse-resize;
+}
+
+.venner-resize-handle.se {
+	bottom: 0;
+	right: 0;
+	cursor: nwse-resize;
+}
+
+.venner-resize-handle.sw {
+	bottom: 0;
+	left: 0;
+	cursor: nesw-resize;
+}
+
+.venner-snap-preview {
+	position: absolute;
+	inset: 0;
+	border: 2px solid color-mix(in srgb, var(--venner-accent, #3584e4) 75%, transparent);
+	background: color-mix(in srgb, var(--venner-accent, #3584e4) 14%, transparent);
+	pointer-events: none;
+	z-index: 24;
+	border-radius: 10px;
+	transition: all var(--venner-transition-fast, 150ms ease);
+}
+
+.venner-snap-preview.zone-top {
+	inset: 0 0 50% 0;
+}
+
+.venner-snap-preview.zone-left {
+	inset: 0 50% 0 0;
+}
+
+.venner-snap-preview.zone-right {
+	inset: 0 0 0 50%;
+}
+
+.venner-snap-preview.zone-top-left {
+	inset: 0 50% 50% 0;
+}
+
+.venner-snap-preview.zone-top-right {
+	inset: 0 0 50% 50%;
 }
