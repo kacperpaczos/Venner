@@ -168,15 +168,8 @@ function App() {
   return (
     <main class="runner-root">
       <section class={`runner-surface ${profile().chromeStyle === "debug-transparent" ? "pink-transparent-mode" : "gtk-window-mode"}`}>
-        <button type="button" class="resize-handle n" aria-label="Resize north" onMouseDown={() => startResize("North")} />
-        <button type="button" class="resize-handle s" aria-label="Resize south" onMouseDown={() => startResize("South")} />
-        <button type="button" class="resize-handle e" aria-label="Resize east" onMouseDown={() => startResize("East")} />
-        <button type="button" class="resize-handle w" aria-label="Resize west" onMouseDown={() => startResize("West")} />
-        <button type="button" class="resize-handle ne" aria-label="Resize north-east" onMouseDown={() => startResize("NorthEast")} />
-        <button type="button" class="resize-handle nw" aria-label="Resize north-west" onMouseDown={() => startResize("NorthWest")} />
-        <button type="button" class="resize-handle se" aria-label="Resize south-east" onMouseDown={() => startResize("SouthEast")} />
-        <button type="button" class="resize-handle sw" aria-label="Resize south-west" onMouseDown={() => startResize("SouthWest")} />
         <ApplicationWindow
+          windowId="main"
           title="Venner Window"
           subtitle="GTK-like replacement runner"
           chromeMode="custom"
@@ -186,6 +179,7 @@ function App() {
           onMinimize={() => runWindowAction("minimize", () => windowController.minimize(), { minimized: true, focused: false })}
           onToggleMaximize={() => runWindowAction("toggle_maximize", () => windowController.toggleMaximize(), { maximized: !(runtime()?.maximized ?? false), minimized: false })}
           onCloseRequest={() => runWindowAction("close_request", () => windowController.closeRequest())}
+          onStartResize={(direction) => void startResize(direction)}
           startSlot={<span class="runner-app-name">Venner</span>}
           endSlot={<span class="runner-theme-tag">{diagnostics()?.colorScheme ?? "system"}</span>}
         >
