@@ -10,6 +10,9 @@ export { events, listen } from "./api/listen";
 export { store } from "./store";
 export { createWindowController, windowController } from "./window/controller";
 export { createWindowGraph, WindowGraph } from "./window/graph";
+export { createWindowZoomController, WindowZoomController, ZOOM_STEPS } from "./window/zoom";
+export { detectSnapZone, snapZoneToTiledState } from "./window/snap";
+export type { SnapZone, SnapDetectionInput } from "./window/snap";
 export type {
 	AboutDialogResult,
 	Action,
@@ -36,4 +39,5 @@ export type {
 	WindowController,
 	WindowGraphState,
 	WindowRuntimeState,
+	WindowTiledState,
 } from "./window/types";
