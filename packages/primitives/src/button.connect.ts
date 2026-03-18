@@ -27,10 +27,14 @@ export interface ButtonApi {
 		"data-variant": string;
 		"data-size": string;
 		disabled: boolean;
+		touchAction: "manipulation";
 		onMouseEnter: () => void;
 		onMouseLeave: () => void;
 		onMouseDown: () => void;
 		onMouseUp: () => void;
+		onTouchStart: () => void;
+		onTouchEnd: () => void;
+		onTouchCancel: () => void;
 		onFocus: () => void;
 		onBlur: () => void;
 		onKeyDown: (event: KeyboardEvent) => void;
@@ -65,10 +69,14 @@ export function buttonConnect(service: ButtonServiceLike): ButtonApi {
 			"data-variant": variant,
 			"data-size": size,
 			disabled,
+			touchAction: "manipulation",
 			onMouseEnter: () => service.send({ type: "POINTER_ENTER" }),
 			onMouseLeave: () => service.send({ type: "POINTER_LEAVE" }),
 			onMouseDown: () => service.send({ type: "POINTER_DOWN" }),
 			onMouseUp: () => service.send({ type: "POINTER_UP" }),
+			onTouchStart: () => service.send({ type: "TOUCH_START" }),
+			onTouchEnd: () => service.send({ type: "TOUCH_END" }),
+			onTouchCancel: () => service.send({ type: "POINTER_CANCEL" }),
 			onFocus: () => service.send({ type: "FOCUS" }),
 			onBlur: () => service.send({ type: "BLUR" }),
 			onKeyDown: (event: KeyboardEvent) => {
