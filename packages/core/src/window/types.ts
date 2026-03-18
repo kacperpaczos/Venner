@@ -1,3 +1,13 @@
+export type WindowTiledState =
+	| "none"
+	| "left"
+	| "right"
+	| "top"
+	| "top-left"
+	| "top-right"
+	| "bottom-left"
+	| "bottom-right";
+
 export interface WindowRuntimeState {
 	label: string;
 	nativeDecorations: boolean;
@@ -11,6 +21,7 @@ export interface WindowRuntimeState {
 	y: number | null;
 	width: number | null;
 	height: number | null;
+	tiled?: WindowTiledState;
 }
 
 export interface WindowBehaviorProfile {

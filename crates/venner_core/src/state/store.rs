@@ -141,7 +141,7 @@ impl VennerStore {
         let (mut state_value, source_schema) =
             extract_state_value(parsed, &mut warnings, &mut errors);
 
-        let migrated_from = source_schema.filter(|v| *v < CURRENT_SCHEMA_VERSION);
+        let migrated_from = Some(source_schema.unwrap_or(1)).filter(|v| *v < CURRENT_SCHEMA_VERSION);
 
         if errors.is_empty() {
             if let Err(err) = migrate_state_value(&mut state_value, source_schema, &mut warnings) {
@@ -348,6 +348,11 @@ impl VennerStore {
                     state.session.active_route = route.clone();
                 }
             }
+            Action::WindowTile { window_id, tiled } => {
+                if let Some(window) = state.windows.get_mut(window_id) {
+                    window.tiled = tiled.clone();
+                }
+            }
             Action::ThemeChanged { tokens } => {
                 state.theme = tokens.clone();
             }
@@ -508,6 +513,8 @@ fn migrate_v1_to_v2(state_value: &mut Value, warnings: &mut Vec<String>) -> Resu
                     .or_insert(json!({"x": 0.0, "y": 0.0, "anchorId": null}));
                 w.entry("viewport".to_string())
                     .or_insert(json!({"zoom": 1.0, "density": null, "breakpoint": null}));
+                w.entry("tiled".to_string())
+                    .or_insert(Value::String("none".to_string()));
             }
         }
     }
@@ -546,7 +553,7 @@ fn now_unix() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::state::{SessionState, ThemeTokens, UiState, WindowState};
+    use crate::state::app_state::{SessionState, ThemeTokens, UiState, WindowState};
     use std::collections::HashMap;
 
     fn sample_state() -> AppState {
@@ -562,6 +569,7 @@ mod tests {
                 maximized: false,
                 focused: true,
                 route: "/home".to_string(),
+                tiled: "none".to_string(),
                 scroll: Default::default(),
                 viewport: Default::default(),
             },

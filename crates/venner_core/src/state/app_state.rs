@@ -109,6 +109,8 @@ pub struct WindowState {
     pub focused: bool,
     #[serde(default = "default_route")]
     pub route: String,
+    #[serde(default = "default_tiled")]
+    pub tiled: String,
     #[serde(default)]
     pub scroll: ScrollState,
     #[serde(default)]
@@ -298,6 +300,10 @@ pub enum Action {
         window_id: String,
         route: String,
     },
+    WindowTile {
+        window_id: String,
+        tiled: String,
+    },
     ThemeChanged {
         tokens: ThemeTokens,
     },
@@ -321,6 +327,10 @@ fn default_window_height() -> u32 {
 
 fn default_route() -> String {
     "/".to_string()
+}
+
+fn default_tiled() -> String {
+    "none".to_string()
 }
 
 fn default_ui_scale() -> f64 {

@@ -30,9 +30,20 @@ export interface WindowState {
 	maximized: boolean;
 	focused: boolean;
 	route: string;
+	tiled: WindowTiledState;
 	scroll: ScrollState;
 	viewport: ViewportState;
 }
+
+export type WindowTiledState =
+	| "none"
+	| "left"
+	| "right"
+	| "top"
+	| "top-left"
+	| "top-right"
+	| "bottom-left"
+	| "bottom-right";
 
 export interface WidgetState {
 	id: string;
@@ -288,4 +299,5 @@ export type Action =
 	  }
 	| { type: "UiPanelUpdate"; id: string; collapsed: boolean }
 	| { type: "Navigate"; window_id: string; route: string }
+	| { type: "WindowTile"; window_id: string; tiled: WindowTiledState }
 	| { type: "ThemeChanged"; tokens: ThemeTokens };

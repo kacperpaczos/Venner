@@ -445,6 +445,7 @@ fn default_app_state() -> AppState {
                 maximized: false,
                 focused: true,
                 route: "/".to_string(),
+                tiled: "none".to_string(),
                 scroll: ScrollState::default(),
                 viewport: ViewportState::default(),
             },
