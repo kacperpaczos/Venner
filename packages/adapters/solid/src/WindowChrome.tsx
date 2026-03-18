@@ -1,5 +1,6 @@
 import type { WindowBehaviorProfile, WindowRuntimeState } from "@venner/core";
 import type { JSX } from "solid-js";
+import { Show, createSignal } from "solid-js";
 import "@venner/ui/styles/window-chrome.css";
 
 interface WindowChromeProps {
@@ -13,11 +14,13 @@ interface WindowChromeProps {
 	onToggleMaximize?: () => void;
 	onCloseRequest?: () => void;
 	onStartDragging?: () => void;
+	onStartResize?: () => void;
 	startSlot?: JSX.Element;
 	endSlot?: JSX.Element;
 }
 
 export function WindowChrome(props: WindowChromeProps) {
+	const [contextMenu, setContextMenu] = createSignal<{ x: number; y: number } | null>(null);
 	const maximized = () => Boolean(props.runtimeState?.maximized);
 	const focused = () => Boolean(props.runtimeState?.focused);
 	const fullscreen = () => Boolean(props.runtimeState?.fullscreen);
@@ -33,6 +36,11 @@ export function WindowChrome(props: WindowChromeProps) {
 			data-native-decorations={props.profile.nativeDecorations}
 			data-variant={variant()}
 			data-focused={focused()}
+			onContextMenu={(event) => {
+				event.preventDefault();
+				setContextMenu({ x: event.clientX, y: event.clientY });
+			}}
+			onMouseDown={() => setContextMenu(null)}
 		>
 			<button
 				type="button"
@@ -103,6 +111,23 @@ export function WindowChrome(props: WindowChromeProps) {
 					</span>
 				</button>
 			</div>
+			<Show when={contextMenu()}>
+				<div
+					class="venner-window-context-menu"
+					style={{
+						left: `${contextMenu()?.x ?? 0}px`,
+						top: `${contextMenu()?.y ?? 0}px`,
+					}}
+				>
+					<button type="button" onClick={() => { props.onStartDragging?.(); setContextMenu(null); }}>Move</button>
+					<button type="button" onClick={() => { props.onStartResize?.(); setContextMenu(null); }}>Resize</button>
+					<button type="button" onClick={() => { props.onMinimize?.(); setContextMenu(null); }} disabled={!props.profile.allowMinimize}>Minimize</button>
+					<button type="button" onClick={() => { props.onToggleMaximize?.(); setContextMenu(null); }} disabled={!props.profile.allowMaximize}>
+						{maximized() ? "Restore" : "Maximize"}
+					</button>
+					<button type="button" class="danger" onClick={() => { props.onCloseRequest?.(); setContextMenu(null); }}>Close</button>
+				</div>
+			</Show>
 		</header>
 	);
 }
