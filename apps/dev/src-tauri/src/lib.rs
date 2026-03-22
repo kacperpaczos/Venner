@@ -759,6 +759,7 @@ pub fn run() {
             venner_core::commands::export_state,
             venner_core::commands::import_state,
             venner_core::commands::validate_state,
+            venner_core::commands::get_desktop_env,
             venner_core::commands::get_gtk_theme,
             venner_core::commands::get_gtk_theme_diagnostics,
             venner_core::commands::get_compiled_gtk_theme,

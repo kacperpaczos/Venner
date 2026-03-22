@@ -205,6 +205,7 @@ pub fn run() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
+            venner_core::commands::get_desktop_env,
             venner_core::commands::get_gtk_theme,
             venner_core::commands::get_gtk_theme_diagnostics,
             venner_core::commands::get_compiled_gtk_theme,

@@ -1,3 +1,4 @@
+import { invoke } from "@venner/core";
 import { getThemeDiagnostics, getThemeTokens, injectGnomeTheme, type ThemeDiagnostics } from "@venner/themes-gnome";
 import { createSignal, onMount } from "solid-js";
 import { HubPanel } from "./HubPanel";
@@ -15,7 +16,17 @@ function App() {
 	};
 
 	onMount(async () => {
-		await injectGnomeTheme();
+		try {
+			const desktopEnv = await invoke<string>("get_desktop_env");
+			if (desktopEnv === "kde") {
+				const { injectKdeTheme } = await import("@venner/themes-kde");
+				await injectKdeTheme();
+			} else {
+				await injectGnomeTheme();
+			}
+		} catch {
+			await injectGnomeTheme();
+		}
 		await refreshTheme();
 	});
 

@@ -1,6 +1,7 @@
 import {
   createWindowGraph,
   type CompiledGtkTheme,
+  invoke,
   windowController,
   type ThemeDiagnostics,
   type WindowBehaviorProfile,
@@ -115,7 +116,17 @@ function App() {
   };
 
   onMount(async () => {
-    await injectGnomeTheme();
+    try {
+      const desktopEnv = await invoke<string>("get_desktop_env");
+      if (desktopEnv === "kde") {
+        const { injectKdeTheme } = await import("@venner/themes-kde");
+        await injectKdeTheme();
+      } else {
+        await injectGnomeTheme();
+      }
+    } catch {
+      await injectGnomeTheme();
+    }
     await refreshTheme();
     await refreshRuntime();
     await runWindowAction("apply_profile_on_start", () => windowController.applyProfile(profile()));
