@@ -1,5 +1,8 @@
 .venner-application-window {
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 	border: 1px solid var(--venner-border, #c5c9d3);
 	border-radius: 10px;
 	background: color-mix(in srgb, var(--venner-bg, #fff) 96%, #000 4%);
@@ -39,6 +42,7 @@
 }
 
 .venner-application-window-header {
+	flex-shrink: 0;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 	align-items: center;
@@ -68,6 +72,9 @@
 }
 
 .venner-application-window-content {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
 	padding: 12px;
 	transform-origin: 0 0;
 	will-change: transform;
