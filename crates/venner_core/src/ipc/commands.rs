@@ -1,5 +1,6 @@
 use crate::state::{Action, AppState, ImportResult, ValidationReport, VennerStore};
 use crate::theme::monitor;
+use crate::theme::resolver;
 use std::collections::HashMap;
 
 /// Tauri commands dla IPC
@@ -42,6 +43,12 @@ pub fn import_state(
     json: String,
 ) -> Result<ImportResult, String> {
     Ok(store.import_state_json(&json))
+}
+
+/// Current desktop environment label (`gnome`, `kde`, `cinnamon`, `xfce`, `unknown:...`).
+#[tauri::command]
+pub fn get_desktop_env() -> String {
+    resolver::detect_desktop().to_string()
 }
 
 /// Return current GTK theme as Venner CSS tokens (--venner-* keys).

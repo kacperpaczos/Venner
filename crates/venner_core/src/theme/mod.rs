@@ -11,4 +11,5 @@ pub mod parser_gtk4;
 pub mod parser_gtk4_widgets;
 pub mod parser_gtk4_window;
 pub mod path;
+pub mod parser_kdeglobals;
 pub mod resolver;

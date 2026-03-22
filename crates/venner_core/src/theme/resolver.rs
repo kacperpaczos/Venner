@@ -1,5 +1,6 @@
 //! Theme resolver: desktop detection, gsettings read, CSS path resolution.
 
+use std::collections::HashMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -241,4 +242,46 @@ pub fn theme_display_name(theme_name: &str) -> Option<String> {
         }
     }
     None
+}
+
+/// Path to `~/.config/kdeglobals` (KDE Plasma global colors).
+pub fn kdeglobals_path() -> Option<PathBuf> {
+    dirs::config_dir().map(|d| d.join("kdeglobals"))
+}
+
+/// Read `~/.config/gtk-3.0/settings.ini` `[Settings]` keys, stripping `gtk-` prefix from names.
+pub fn read_gtk3_settings_ini() -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    let Some(config) = dirs::config_dir() else {
+        return map;
+    };
+    let path = config.join("gtk-3.0").join("settings.ini");
+    let Ok(content) = std::fs::read_to_string(&path) else {
+        return map;
+    };
+
+    let mut in_settings = false;
+    for raw in content.lines() {
+        let line = raw.trim();
+        if line.is_empty() || line.starts_with('#') || line.starts_with(';') {
+            continue;
+        }
+        if line.starts_with('[') && line.ends_with(']') {
+            let name = &line[1..line.len() - 1];
+            in_settings = name == "Settings";
+            continue;
+        }
+        if !in_settings {
+            continue;
+        }
+        let Some((key, value)) = line.split_once('=') else {
+            continue;
+        };
+        let key = key.trim();
+        let value = value.trim();
+        let stripped = key.strip_prefix("gtk-").unwrap_or(key);
+        map.insert(stripped.to_string(), value.to_string());
+    }
+
+    map
 }

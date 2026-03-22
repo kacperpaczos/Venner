@@ -4,15 +4,19 @@ use super::parser_gtk3;
 use super::parser_gtk4;
 use super::parser_gtk4_widgets;
 use super::parser_gtk4_window;
+use super::parser_kdeglobals;
 use super::path;
-use super::resolver::{self, ColorScheme, ThemeGtkVersion};
-use crate::theme::compiled_theme::{build_meta, CompiledGtkTheme};
+use super::resolver::{self, ColorScheme, DesktopEnv, ThemeGtkVersion};
+use crate::theme::compiled_theme::{
+    build_meta, BackdropTheme, ButtonTheme, CompiledGtkTheme, EntryTheme, HeaderbarTheme,
+    WidgetsTheme, WindowControlsTheme, WindowLayoutTheme, WindowTheme,
+};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::thread;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
 
 #[derive(Debug, Clone, Serialize, Default)]
@@ -60,6 +64,10 @@ impl ThemeDiagnostics {
 
 /// Load current theme tokens and diagnostics: system -> project fallback -> defaults.
 pub fn load_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnostics) {
+    if resolver::detect_desktop() == DesktopEnv::Kde {
+        return load_kde_theme_with_diagnostics();
+    }
+
     let settings = resolver::read_theme_settings();
     let now = unix_ts();
 
@@ -118,7 +126,6 @@ pub fn load_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnosti
         ));
         return try_project_or_default(settings, now, fallback_reason);
     }
-    unreachable!("all branches in load_theme_with_diagnostics return");
 }
 
 fn try_project_or_default(
@@ -220,6 +227,10 @@ pub fn load_theme_tokens() -> HashMap<String, String> {
 
 /// Load compiled theme contract (tokens + window/widgets sections) and diagnostics.
 pub fn load_compiled_theme_with_diagnostics() -> (CompiledGtkTheme, ThemeDiagnostics) {
+    if resolver::detect_desktop() == DesktopEnv::Kde {
+        return load_compiled_kde_theme_with_diagnostics();
+    }
+
     let (tokens, diagnostics) = load_theme_with_diagnostics();
     let version = match diagnostics.resolved_gtk_version.as_str() {
         "gtk4" => ThemeGtkVersion::Gtk4,
@@ -296,6 +307,246 @@ fn parse_tokens(css: &str, version: ThemeGtkVersion) -> HashMap<String, String> 
     }
 }
 
+fn merge_kde_token_defaults(tokens: &mut HashMap<String, String>) {
+    for (k, v) in default_tokens() {
+        tokens.entry(k).or_insert(v);
+    }
+    if !tokens.contains_key("--venner-headerbar-bg") {
+        if let Some(bg) = tokens.get("--venner-bg").cloned() {
+            tokens
+                .entry("--venner-headerbar-bg".to_string())
+                .or_insert(bg.clone());
+            tokens
+                .entry("--venner-headerbar-bg-inactive".to_string())
+                .or_insert(bg);
+        }
+    }
+    if !tokens.contains_key("--venner-headerbar-fg") {
+        if let Some(fg) = tokens.get("--venner-fg").cloned() {
+            tokens
+                .entry("--venner-headerbar-fg".to_string())
+                .or_insert(fg.clone());
+            tokens
+                .entry("--venner-headerbar-fg-inactive".to_string())
+                .or_insert(fg);
+        }
+    }
+}
+
+fn kde_hex(rgb: Option<&String>) -> Option<String> {
+    rgb.and_then(|s| parser_kdeglobals::rgb_str_to_hex(s))
+}
+
+fn build_kde_window_theme(data: &parser_kdeglobals::KdeThemeData) -> WindowTheme {
+    WindowTheme {
+        headerbar: HeaderbarTheme {
+            background_color: kde_hex(data.wm_active_bg.as_ref()),
+            border_color: kde_hex(data.window.background_alternate.as_ref()),
+            min_height: Some("46px".to_string()),
+            ..Default::default()
+        },
+        windowcontrols: WindowControlsTheme {
+            spacing: Some("4px".to_string()),
+            button_min_width: Some("24px".to_string()),
+            button_min_height: Some("24px".to_string()),
+            ..Default::default()
+        },
+        layout: WindowLayoutTheme {
+            controls_spacing: Some("4px".to_string()),
+            ..Default::default()
+        },
+        backdrop: BackdropTheme {
+            headerbar_color: kde_hex(data.wm_inactive_fg.as_ref()),
+            maximize_color: kde_hex(data.wm_inactive_fg.as_ref()),
+            minimize_color: kde_hex(data.wm_inactive_fg.as_ref()),
+            ..Default::default()
+        },
+        ..Default::default()
+    }
+}
+
+fn build_kde_widgets_theme(data: &parser_kdeglobals::KdeThemeData) -> WidgetsTheme {
+    WidgetsTheme {
+        button: ButtonTheme {
+            min_height: Some("32px".to_string()),
+            padding: Some("5px 16px".to_string()),
+            border_radius: Some("4px".to_string()),
+            border_color: kde_hex(data.button.decoration_focus.as_ref()),
+            background_color: kde_hex(data.button.background_normal.as_ref()),
+            color: kde_hex(data.button.foreground_normal.as_ref()),
+            hover_border_color: kde_hex(data.button.decoration_hover.as_ref()),
+            hover_background_color: kde_hex(data.button.background_alternate.as_ref()),
+            active_border_color: kde_hex(data.button.decoration_focus.as_ref()),
+            active_background_color: kde_hex(data.button.decoration_hover.as_ref()),
+            disabled_color: kde_hex(data.button.foreground_inactive.as_ref()),
+            disabled_border_color: kde_hex(data.button.background_alternate.as_ref()),
+            disabled_background_color: kde_hex(data.button.background_normal.as_ref()),
+            ..Default::default()
+        },
+        entry: EntryTheme {
+            min_height: Some("32px".to_string()),
+            padding: Some("6px 10px".to_string()),
+            border_radius: Some("4px".to_string()),
+            border_color: kde_hex(data.view.background_alternate.as_ref()),
+            background_color: kde_hex(data.view.background_normal.as_ref()),
+            color: kde_hex(data.view.foreground_normal.as_ref()),
+            focus_border_color: kde_hex(data.selection.background_normal.as_ref()),
+            disabled_color: kde_hex(data.button.foreground_inactive.as_ref()),
+            disabled_background_color: kde_hex(data.view.background_alternate.as_ref()),
+            ..Default::default()
+        },
+    }
+}
+
+fn load_kde_theme_with_diagnostics() -> (HashMap<String, String>, ThemeDiagnostics) {
+    let now = unix_ts();
+    let gtk_ini = resolver::read_gtk3_settings_ini();
+    let gtk_bridge_theme = gtk_ini
+        .get("theme-name")
+        .cloned()
+        .unwrap_or_else(|| "Breeze".to_string());
+
+    let path_opt = resolver::kdeglobals_path();
+
+    if let Some(ref path) = path_opt {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            let data = parser_kdeglobals::parse_kdeglobals(&content);
+            let mut tokens = parser_kdeglobals::map_kde_to_venner_tokens(&data);
+            merge_kde_token_defaults(&mut tokens);
+
+            let color_scheme = if parser_kdeglobals::is_dark_scheme(&data) {
+                "prefer-dark"
+            } else {
+                "default"
+            };
+            let theme_label = data
+                .color_scheme_name
+                .clone()
+                .unwrap_or_else(|| gtk_bridge_theme.clone());
+
+            let diagnostics = ThemeDiagnostics {
+                desktop_env: "kde".to_string(),
+                schema: "kdeglobals".to_string(),
+                gtk_theme: theme_label,
+                color_scheme: color_scheme.to_string(),
+                source: "system".to_string(),
+                resolved_css_path: Some(path.display().to_string()),
+                resolved_gtk_version: "kde".to_string(),
+                fallback_reason: None,
+                tokens_count: tokens.len(),
+                loaded_at: now,
+                coverage: ThemeCoverage::default(),
+                missing_selectors: Vec::new(),
+                missing_props: Vec::new(),
+            };
+            log::info!(
+                "[theme] source=kde_system path={} gtk_bridge={} tokens={}",
+                path.display(),
+                gtk_bridge_theme,
+                diagnostics.tokens_count,
+            );
+            return (tokens, diagnostics);
+        }
+    }
+
+    let mut tokens = default_tokens();
+    merge_kde_token_defaults(&mut tokens);
+    let fallback_reason = path_opt.as_ref().map(|p| {
+        format!(
+            "kdeglobals_unavailable:path={}",
+            p.display()
+        )
+    });
+
+    let diagnostics = ThemeDiagnostics {
+        desktop_env: "kde".to_string(),
+        schema: "kdeglobals".to_string(),
+        gtk_theme: gtk_bridge_theme.clone(),
+        color_scheme: "default".to_string(),
+        source: "default".to_string(),
+        resolved_css_path: path_opt.as_ref().map(|p| p.display().to_string()),
+        resolved_gtk_version: "kde".to_string(),
+        fallback_reason,
+        tokens_count: tokens.len(),
+        loaded_at: now,
+        coverage: ThemeCoverage::default(),
+        missing_selectors: Vec::new(),
+        missing_props: Vec::new(),
+    };
+
+    log::warn!(
+        "[theme] source=kde_default gtk_bridge={} tokens={}",
+        gtk_bridge_theme,
+        diagnostics.tokens_count,
+    );
+
+    (tokens, diagnostics)
+}
+
+/// Load compiled theme on KDE from `kdeglobals` + GTK settings.ini bridge.
+pub fn load_compiled_kde_theme_with_diagnostics() -> (CompiledGtkTheme, ThemeDiagnostics) {
+    let (tokens, diagnostics) = load_kde_theme_with_diagnostics();
+
+    let data = if diagnostics.source == "system" {
+        diagnostics
+            .resolved_css_path
+            .as_ref()
+            .and_then(|p| std::fs::read_to_string(p).ok())
+            .map(|c| parser_kdeglobals::parse_kdeglobals(&c))
+            .unwrap_or_default()
+    } else {
+        parser_kdeglobals::KdeThemeData::default()
+    };
+
+    let window = build_kde_window_theme(&data);
+    let widgets = build_kde_widgets_theme(&data);
+    let hash_input = format!("kde:{:?}{:?}", tokens, diagnostics.gtk_theme);
+    let version = ThemeGtkVersion::Unknown;
+
+    let compiled = CompiledGtkTheme {
+        tokens,
+        window,
+        widgets,
+        meta: build_meta(&diagnostics, version, &hash_input),
+    };
+
+    let diagnostics = diagnostics.with_empty_coverage();
+    (compiled, diagnostics)
+}
+
+/// Poll `kdeglobals` mtime and emit the same theme events as the GTK monitor.
+pub fn start_kde_theme_monitor(app_handle: tauri::AppHandle) {
+    thread::spawn(move || {
+        let Some(path) = resolver::kdeglobals_path() else {
+            log::warn!("[theme] kde_monitor_no_config_dir");
+            return;
+        };
+
+        let mut last_mtime: Option<SystemTime> = None;
+        loop {
+            thread::sleep(Duration::from_secs(2));
+            match std::fs::metadata(&path) {
+                Ok(meta) => {
+                    let mtime = meta.modified().ok();
+                    if last_mtime.is_some() && mtime != last_mtime {
+                        let (compiled, diagnostics) = load_compiled_kde_theme_with_diagnostics();
+                        let _ = app_handle.emit("theme:changed", &compiled.tokens);
+                        let _ = app_handle.emit("theme:compiled-changed", &compiled);
+                        let _ = app_handle.emit("theme:diagnostics", &diagnostics);
+                        log::info!(
+                            "[theme] kde_changed path={} tokens={}",
+                            path.display(),
+                            diagnostics.tokens_count,
+                        );
+                    }
+                    last_mtime = mtime;
+                }
+                Err(_) => {}
+            }
+        }
+    });
+}
+
 fn color_scheme_label(scheme: ColorScheme) -> String {
     match scheme {
         ColorScheme::Default => "default".to_string(),
@@ -339,6 +590,12 @@ const THEME_KEYS: &[&str] = &["gtk-theme", "color-scheme", "accent-color", "font
 /// with fresh tokens whenever a theme-related key changes.
 pub fn start_theme_monitor(app_handle: tauri::AppHandle) {
     let desktop = resolver::detect_desktop();
+    if desktop == DesktopEnv::Kde {
+        log::info!("[theme] monitor_start desktop=kde (poll kdeglobals)");
+        start_kde_theme_monitor(app_handle);
+        return;
+    }
+
     let schema = resolver::theme_schema_for_desktop(&desktop);
 
     log::info!(
